@@ -25,7 +25,14 @@
    <small> and more... </small>
 </pre>
 
-## Project setup
+## Project modelisation:UML
+
+# I used UML for analyse project requirements.
+
+<b>
+  Class Diagram :
+</b>
+![alt text](class_diagram.png)
 
 ## Description
 
