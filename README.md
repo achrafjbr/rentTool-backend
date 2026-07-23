@@ -7,6 +7,26 @@
 
 ## Description
 
+<pre>
+  This's a <b>final trainig project</b> it's idea about rent tool instead of buying tools, the renter could rent tools from the owner, for the current version i'll swim far from Payment, Location, Chat. i'll use them in the next version, but i'll use websocket for sending notifications and rent requests.
+  <i> the app includes : </i>
+  <small>- filtring </small>
+  <small>- searching </small>
+  <small>- profile </small>
+  <small>- Available, Occupped tools </small>
+  <small>- renter space </small>
+  <small>- renter space </small>
+  <small>- notification </small>
+  <small>- rental tacking </small>
+  <small>- authentication & authorization </small>
+  <small>- rental notification </small>
+   <small> and more... </small>
+</pre>
+
+## Project setup
+
+## Description
+
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Project setup
@@ -14,6 +34,16 @@
 ```bash
 $ npm install
 ```
+
+## Compile and run the project
+
+````bash
+# development
+
+
+```bash
+$ npm install
+````
 
 ## Compile and run the project
 
