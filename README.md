@@ -32,7 +32,8 @@
 <b>
   Class Diagram :
 </b>
-![alt text](class_diagram.png)
+<img width="1121" height="597" alt="class_diagram" src="https://github.com/user-attachments/assets/d9ccb695-0c66-4b2d-a44a-7fe12ad942e8" />
+
 
 ## Description
 
