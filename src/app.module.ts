@@ -4,6 +4,16 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { ResponseInterceptor } from './core/interceptors/interceptos.responseInterceptor';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ErrorExceptionFilter } from './core/filters/filters.errorExceptionFilter';
+import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { UserModule } from './modules/user/user.module';
+import { User, UserSchema } from './modules/user/schemas/user.schema';
+import {
+  Authentication,
+  AuthenticationSchema,
+} from './modules/authentication/schemas/authentication.schema';
 
 @Module({
   imports: [
@@ -29,8 +39,20 @@ import { JwtModule } from '@nestjs/jwt';
         };
       },
     }),
+    AuthenticationModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: ErrorExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule {}
