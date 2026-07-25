@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
+import { JwtPayloadType } from 'src/common/types/types.auth';
 
 @Injectable()
 export class UserService {
@@ -16,27 +17,21 @@ export class UserService {
       { email },
       { __v: false },
     );
-    console.log('User', user);
     return user;
   }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async me(user: JwtPayloadType) {
+    return await this.userModel.findOne({ _id: user.id });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async updateProfile(user: JwtPayloadType, updateUserDto: UpdateUserDto) {
+    return await this.userModel.findByIdAndUpdate(user.id, updateUserDto, {
+      new: true,
+      projection: { password: false },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async getUserById(userId: string) {
+    return '';
   }
 }

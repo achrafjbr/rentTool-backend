@@ -4,7 +4,7 @@ import { CURRENT_USER } from '../constants/constants';
 import { JwtPayloadType } from '../types/types.auth';
 
 export const CurrentUser = createParamDecorator(
-  (data: string, context: ExecutionContext) => {
+  (data: any, context: ExecutionContext) => {
     const currentUser: JwtPayloadType = context
       .switchToHttp()
       .getRequest<Request>()[CURRENT_USER];

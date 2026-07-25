@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '../user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -21,9 +21,13 @@ export class AuthenticationJwtService {
   }
 
   public verifyToken(token: string): JwtPayloadType {
-    const payload = this.jwtService.verify<JwtPayloadType>(token, {
-      secret: this.configService.get<string>('JWT_KEY'),
-    });
-    return payload;
+    try {
+      const payload = this.jwtService.verify<JwtPayloadType>(token, {
+        secret: this.configService.get<string>('JWT_KEY'),
+      });
+      return payload;
+    } catch (error) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
   }
 }

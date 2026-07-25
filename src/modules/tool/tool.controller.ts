@@ -1,44 +1,31 @@
 import {
   Controller,
   Get,
-  Body,
-  Patch,
-  UseInterceptors,
+  Post,
+  Param,
+  Delete,
   UseGuards,
-  BadRequestException,
   UploadedFile,
-  Put,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { CurrentUser } from 'src/common/decorators/decorators.currentUser';
 import type { JwtPayloadType } from 'src/common/types/types.auth';
+import { CreateToolDto } from './dtos/create-tool.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
+import { diskStorage } from 'multer';
 import { extname } from 'path';
 
-@Controller('user')
+@Controller('tool')
 @UseGuards(AuthGuard)
-export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  @Get()
-  me(@CurrentUser() user: JwtPayloadType) {
-    return this.userService.me(user);
-  }
-
-  @Get()
-  getUserById(userId: string) {
-    return this.userService.getUserById(userId);
-  }
-
-  @Put('profile')
+export class ToolController {
+  @Post('publish_tool')
   @UseInterceptors(
     FileInterceptor('picture', {
       storage: diskStorage({
-        destination: './uploads/users',
+        destination: './uploads/tools',
         filename: (req, file, cb) => {
           const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)} ${extname(file.originalname)}`;
           cb(null, filename);
@@ -56,17 +43,24 @@ export class UserController {
       },
     }),
   )
-  async updateProfile(
+  public async publishTool(
     @CurrentUser() user: JwtPayloadType,
-    @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
-    if (file) {
-      const currentUser = await this.userService.me(user);
-      if (!currentUser?.picture) {
-        updateUserDto.picture = `users/${file.filename}`;
-      }
-    }
-    return await this.userService.updateProfile(user, updateUserDto);
-  }
+    createToolDto: CreateToolDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {}
+
+  @Delete(':id')
+  public async removeTool(
+    @Param() toolId: string,
+    @CurrentUser() user: JwtPayloadType,
+  ) {}
+
+  @Get(':id')
+  public async getTool(@Param() toolId: string) {}
+
+  @Get('tools')
+  public async getTools() {}
+
+  @Get('owner_tools')
+  public async getOwnerTools(@CurrentUser() user: JwtPayloadType) {}
 }
