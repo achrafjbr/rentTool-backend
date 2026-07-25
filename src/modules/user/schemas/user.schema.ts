@@ -1,6 +1,8 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
+import { timeStamp } from 'console';
 import { Document } from 'mongoose';
 
+@Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ type: String, required: true })
   fullName!: string;

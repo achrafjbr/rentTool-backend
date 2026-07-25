@@ -12,7 +12,11 @@ export class UserService {
   ) {}
 
   public async getUserByEmail(email: string): Promise<User | null> {
-    const user: User | null = await this.userModel.findOne({ email: email });
+    const user: User | null = await this.userModel.findOne(
+      { email },
+      { __v: false },
+    );
+    console.log('User', user);
     return user;
   }
 

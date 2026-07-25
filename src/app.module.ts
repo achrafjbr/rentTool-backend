@@ -9,11 +9,6 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ErrorExceptionFilter } from './core/filters/filters.errorExceptionFilter';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { UserModule } from './modules/user/user.module';
-import { User, UserSchema } from './modules/user/schemas/user.schema';
-import {
-  Authentication,
-  AuthenticationSchema,
-} from './modules/authentication/schemas/authentication.schema';
 
 @Module({
   imports: [

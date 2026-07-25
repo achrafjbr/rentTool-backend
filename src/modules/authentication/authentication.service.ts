@@ -1,15 +1,13 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtService } from '@nestjs/jwt';
 import { PASSWORD_ENCRYPTION } from 'src/common/constants/constants';
 import { PasswordEncryptionService } from './password-encryption.service';
 import { UserService } from '../user/user.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { Authentication } from './schemas/authentication.schema';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
 import { AuthenticationJwtService } from './authentication.jwt.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -20,22 +18,26 @@ export class AuthenticationService {
     @Inject(PASSWORD_ENCRYPTION)
     private readonly passwordEncryptionService: PasswordEncryptionService,
 
-    @InjectModel(Authentication.name)
-    private readonly authenticationModel: Model<Authentication>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<User>,
   ) {}
 
-  public async register(registerDto: RegisterDto): Promise<User> {
+  public async register(registerDto: CreateUserDto): Promise<User> {
+    const isEmailExisted = await this.userService.getUserByEmail(
+      registerDto.email,
+    );
+    if (isEmailExisted)
+      throw new HttpException('Email already exists', HttpStatus.UNAUTHORIZED);
     const hashedPassword = await this.passwordEncryptionService.encrypPassword(
       registerDto.password,
     );
-    const user = await this.authenticationModel.create({
-      ...registerDto,
-      password: hashedPassword,
-    });
+    registerDto.password = hashedPassword;
+    const user = new this.userModel(registerDto);
+    await user.save();
     return user;
   }
 
-  async login(loginDto: LoginDto) {
+  public async login(loginDto: LoginDto) {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
       throw new HttpException(
@@ -54,6 +56,8 @@ export class AuthenticationService {
       );
     }
     const token = this.authenticationJwtService.signToken(user);
-    return { ...user, token };
+    const userObject = user.toObject();
+    delete userObject.password;
+    return { user: userObject, token };
   }
 }

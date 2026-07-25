@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ResponseInterceptor } from './core/interceptors/interceptos.responseInterceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  (app.enableCors({}),
+
+  (app.setGlobalPrefix('v1/api'),
+    app.enableCors({}),
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
