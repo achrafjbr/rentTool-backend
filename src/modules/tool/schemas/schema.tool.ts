@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { User } from 'src/modules/user/schemas/user.schema';
 
 export enum ToolStatus {
-  AVAILABLE,
-  PEINDING,
+  AVAILABLE = 'AVAILABLE',
+  RENTED = 'RENTED',
 }
 
 @Schema({ timestamps: true })
@@ -22,13 +22,20 @@ export class Tool extends Document {
   pricePerDay!: number;
 
   @Prop({ type: Number, required: true, min: 1 })
-  dipositAmount!: number;
+  depositAmount!: number;
+
+  @Prop({ type: String, required: true })
+  image!: string;
 
   @Prop({ type: String, enum: ToolStatus, default: ToolStatus.AVAILABLE })
-  toolSatatus!: string;
+  toolStatus?: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  owner!: User;
+  @Prop({
+    type: Types.ObjectId,
+    ref: User.name,
+    required: true,
+  })
+  owner!: Types.ObjectId;
 }
 
 export const ToolSchema = SchemaFactory.createForClass(Tool);

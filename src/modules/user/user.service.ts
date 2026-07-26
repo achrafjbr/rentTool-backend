@@ -31,9 +31,8 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     file?: Express.Multer.File,
   ) {
-    const user = await this.me(userPayload);
-
     if (file) {
+      const user = await this.me(userPayload);
       if (user?.picture) {
         try {
           await unlink(join(process.cwd(), 'uploads', user.picture));

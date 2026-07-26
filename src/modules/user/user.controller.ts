@@ -42,7 +42,7 @@ export class UserController {
       storage: diskStorage({
         destination: './uploads/users',
         filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)} ${extname(file.originalname)}`;
+          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
           cb(null, filename);
         },
       }),
@@ -54,7 +54,7 @@ export class UserController {
         cb(null, true);
       },
       limits: {
-        fieldSize: 1024 * 1024 * 2,
+        fieldSize: 2 * 1024 * 1024,
       },
     }),
   )

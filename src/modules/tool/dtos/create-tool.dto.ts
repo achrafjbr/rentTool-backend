@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ToolStatus } from '../schemas/schema.tool';
+import { Type } from 'class-transformer';
 
 export class CreateToolDto {
   @IsString()
@@ -26,14 +27,16 @@ export class CreateToolDto {
   category!: string;
 
   @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
   @Min(1)
   pricePerDay!: number;
 
   @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
   @Min(1)
-  dipositAmount!: number;
+  depositAmount!: number;
 
   @IsEnum(ToolStatus)
   @IsOptional()

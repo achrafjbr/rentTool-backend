@@ -22,13 +22,11 @@ export class AuthGuard implements CanActivate {
     const contextArgs = context.switchToHttp();
     const request = contextArgs.getRequest<Request>();
     const authorization: string | undefined = request.headers.authorization;
-    console.log('authorization', authorization);
     if (authorization) {
       if (request[CURRENT_USER]) {
         return true;
       }
       const token = authorization.split(' ')[1];
-      console.log('token', token);
 
       request[CURRENT_USER] = this.authenticationJwtService.verifyToken(token);
       return true;

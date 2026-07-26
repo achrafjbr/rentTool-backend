@@ -10,6 +10,7 @@ import { ErrorExceptionFilter } from './core/filters/filters.errorExceptionFilte
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { UserModule } from './modules/user/user.module';
 import { ToolModule } from './modules/tool/tool.module';
+import { ToolReviewModule } from './modules/tool-review/tool-review.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ToolModule } from './modules/tool/tool.module';
     AuthenticationModule,
     UserModule,
     ToolModule,
+    ToolReviewModule,
   ],
   controllers: [AppController],
   providers: [

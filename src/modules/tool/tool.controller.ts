@@ -8,6 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Body,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { CurrentUser } from 'src/common/decorators/decorators.currentUser';
@@ -17,17 +18,20 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { ToolService } from './tool.service';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('tool')
 @UseGuards(AuthGuard)
 export class ToolController {
+  constructor(private readonly toolService: ToolService) {}
   @Post('publish_tool')
   @UseInterceptors(
     FileInterceptor('picture', {
       storage: diskStorage({
         destination: './uploads/tools',
         filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)} ${extname(file.originalname)}`;
+          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
           cb(null, filename);
         },
       }),
@@ -39,28 +43,41 @@ export class ToolController {
         cb(null, true);
       },
       limits: {
-        fieldSize: 1024 * 1024 * 2,
+        fieldSize: 2 * 1024 * 1024,
       },
     }),
   )
   public async publishTool(
-    @CurrentUser() user: JwtPayloadType,
-    createToolDto: CreateToolDto,
+    @CurrentUser() userPayload: JwtPayloadType,
+    @Body() createToolDto: CreateToolDto,
     @UploadedFile() file: Express.Multer.File,
-  ) {}
+  ) {
+    if (!file) {
+      throw new BadRequestException('Should upload tool image');
+    }
+    return await this.toolService.publishTool(userPayload, createToolDto, file);
+  }
 
-  @Delete(':id')
+  @Get('my-tools')
+  public async getOwnerTools(@CurrentUser() userPayload: JwtPayloadType) {
+    return await this.toolService.getOwnerTools(userPayload);
+  }
+
+  @Delete(':toolId')
   public async removeTool(
-    @Param() toolId: string,
-    @CurrentUser() user: JwtPayloadType,
-  ) {}
+    @Param('toolId', ParseObjectIdPipe) toolId: string,
+    @CurrentUser() userPayload: JwtPayloadType,
+  ) {
+    return await this.toolService.removeTool(toolId, userPayload);
+  }
 
-  @Get(':id')
-  public async getTool(@Param() toolId: string) {}
+  @Get(':toolId')
+  public async getTool(@Param('toolId', ParseObjectIdPipe) toolId: string) {
+    return await this.toolService.getTool(toolId);
+  }
 
-  @Get('tools')
-  public async getTools() {}
-
-  @Get('owner_tools')
-  public async getOwnerTools(@CurrentUser() user: JwtPayloadType) {}
+  @Get()
+  public async getTools() {
+    return await this.toolService.getTools();
+  }
 }
