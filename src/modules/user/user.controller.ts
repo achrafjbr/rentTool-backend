@@ -17,7 +17,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import { unlink } from 'fs/promises';
+import { cwd } from 'process';
 
 @Controller('user')
 @UseGuards(AuthGuard)
@@ -34,7 +36,7 @@ export class UserController {
     return this.userService.getUserById(userId);
   }
 
-  @Put('profile')
+  @Patch('profile')
   @UseInterceptors(
     FileInterceptor('picture', {
       storage: diskStorage({
@@ -57,16 +59,14 @@ export class UserController {
     }),
   )
   async updateProfile(
-    @CurrentUser() user: JwtPayloadType,
+    @CurrentUser() userPayload: JwtPayloadType,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    if (file) {
-      const currentUser = await this.userService.me(user);
-      if (!currentUser?.picture) {
-        updateUserDto.picture = `users/${file.filename}`;
-      }
-    }
-    return await this.userService.updateProfile(user, updateUserDto);
+    return await this.userService.updateProfile(
+      userPayload,
+      updateUserDto,
+      file,
+    );
   }
 }

@@ -5,6 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { JwtPayloadType } from 'src/common/types/types.auth';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class UserService {
@@ -24,11 +26,31 @@ export class UserService {
     return await this.userModel.findOne({ _id: user.id });
   }
 
-  async updateProfile(user: JwtPayloadType, updateUserDto: UpdateUserDto) {
-    return await this.userModel.findByIdAndUpdate(user.id, updateUserDto, {
-      new: true,
-      projection: { password: false },
-    });
+  async updateProfile(
+    userPayload: JwtPayloadType,
+    updateUserDto: UpdateUserDto,
+    file?: Express.Multer.File,
+  ) {
+    const user = await this.me(userPayload);
+
+    if (file) {
+      if (user?.picture) {
+        try {
+          await unlink(join(process.cwd(), 'uploads', user.picture));
+          file;
+        } catch {}
+      }
+
+      updateUserDto.picture = `users/${file.filename}`;
+    }
+    return await this.userModel.findByIdAndUpdate(
+      userPayload.id,
+      updateUserDto,
+      {
+        new: true,
+        projection: { password: false },
+      },
+    );
   }
 
   async getUserById(userId: string) {
