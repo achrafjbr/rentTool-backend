@@ -11,6 +11,11 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
 import { UserModule } from './modules/user/user.module';
 import { ToolModule } from './modules/tool/tool.module';
 import { ToolReviewModule } from './modules/tool-review/tool-review.module';
+import { AppsocketGateway } from './modules/appsocket/appsocket.gateway';
+import { AppsocketModule } from './modules/appsocket/appsocket.module';
+import { AppsocketService } from './modules/appsocket/appsocket.service';
+import { AuthenticationJwtService } from './modules/authentication/authentication.jwt.service';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -40,6 +45,8 @@ import { ToolReviewModule } from './modules/tool-review/tool-review.module';
     UserModule,
     ToolModule,
     ToolReviewModule,
+    AppsocketModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -52,6 +59,9 @@ import { ToolReviewModule } from './modules/tool-review/tool-review.module';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
+    AppsocketGateway,
+    AppsocketService,
+    AuthenticationJwtService,
   ],
 })
 export class AppModule {}
