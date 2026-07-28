@@ -8,7 +8,10 @@ import { Model } from 'mongoose';
 import { JwtPayloadType } from 'src/common/types/types.auth';
 import { ToolService } from '../tool/tool.service';
 import { NotificationService } from '../notification/notification.service';
-import { NotificationType } from '../notification/schemas/notification.schema';
+import {
+  NotificationType,
+  RelatedType,
+} from '../notification/schemas/notification.schema';
 import {
   NOTIFICATION,
   TOOL_REVIEW,
@@ -20,12 +23,14 @@ import { UserReview } from './schemas/user-review.schema';
 import { CreateUserReviewDto } from './dtos/create-user-review';
 import { UserService } from '../user/user.service';
 import { RealtimeService } from '../realtime/realtime.service';
+import { UpdateToolReviewDto } from './dtos/update-tool-review.dto';
+import { UpdateUserReviewDto } from './dtos/update-user-review.dto';
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectModel(ToolReview.name)
     private readonly toolReviewModel: Model<ToolReview>,
-    @InjectModel(ToolReview.name)
+    @InjectModel(UserReview.name)
     private readonly userReviewModel: Model<UserReview>,
     private readonly toolService: ToolService,
     private readonly notificationService: NotificationService,
@@ -36,12 +41,12 @@ export class ReviewService {
   async createToolReview(
     dto: CreateToolReviewDto,
     userPayload: JwtPayloadType,
-  ): Promise<void> {
-    console.log('createToolReview');
-    // Get tool for use the tool owner later in notification .
-    const tool = await this.toolService.getTool(String(dto.tool));
+  ) {
+    // Extract owner from tool.
+    const tool = await this.toolService.getTool(dto.tool!.toString());
+
     if (!tool) {
-      throw new NotFoundException();
+      throw new NotFoundException('No tool found');
     }
 
     // Create review.
@@ -59,6 +64,7 @@ export class ReviewService {
         message: `${userPayload.fullName} a laissé un avis sur "${tool.name}".`,
         title: 'Nouvel avis',
         type: NotificationType.TOOL_REVIEW,
+        // relatedTye: RelatedType.TOOL_REVIEW,
         related: review._id,
         isRead: false,
         isSeen: false,
@@ -75,16 +81,20 @@ export class ReviewService {
       notification,
     );
 
+    return notification;
+
     // this line was just for test, I'll delete it later
-    this.realtimeService.notifyUser(tool.owner.toString(), TOOL_REVIEW, review);
+    // this.realtimeService.notifyUser(tool.owner.toString(), TOOL_REVIEW, review);
   }
 
   async createUserReview(
     dto: CreateUserReviewDto,
     userPayload: JwtPayloadType,
   ) {
+    console.log('dto', dto);
+    console.log('userPayload', userPayload);
     const targetUser = await this.userService.getUserById(String(dto.to));
-
+    console.log('user', targetUser);
     if (!targetUser) {
       throw new NotFoundException('User not found');
     }
@@ -104,6 +114,7 @@ export class ReviewService {
         message: `${userPayload.fullName} a laissé un avis sur ton profil.`,
         title: 'Nouvel avis',
         type: NotificationType.USER_REVIEW,
+        // relatedTye: RelatedType.USER_REVIEW,
         related: review._id,
         isRead: false,
         isSeen: false,
@@ -116,11 +127,14 @@ export class ReviewService {
     // notify owner
     this.realtimeService.notifyUser(targetUser.id, NOTIFICATION, notification);
 
+    return notification;
+
     // this line was just for test, I'll delete it later
-    this.realtimeService.notifyUser(targetUser.id, USER_REVIEW, review);
+    // this.realtimeService.notifyUser(targetUser.id, USER_REVIEW, review);
   }
 
   async getToolReviews(toolId: string) {
+    console.log('toolId', toolId);
     return await this.toolReviewModel
       .find({ tool: toolId })
       .populate({
@@ -140,5 +154,27 @@ export class ReviewService {
       })
       .sort({ createdAt: -1 })
       .exec();
+  }
+
+  async updateToolReview(id: string, dto: UpdateToolReviewDto) {
+    return await this.toolReviewModel.findByIdAndUpdate(id, dto, {
+      returnDocument: 'after',
+      projection: { __v: 0 },
+    });
+  }
+
+  async updateUserReview(id: string, dto: UpdateUserReviewDto) {
+    return await this.userReviewModel.findByIdAndUpdate(id, dto, {
+      returnDocument: 'after',
+      projection: { __v: 0 },
+    });
+  }
+
+  async deleteToolReview(id: string) {
+    return await this.toolReviewModel.findByIdAndDelete(id);
+  }
+
+  async deleteUserReview(id: string) {
+    return await this.userReviewModel.findByIdAndDelete(id);
   }
 }

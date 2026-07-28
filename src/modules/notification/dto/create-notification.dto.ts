@@ -1,4 +1,4 @@
-import { NotificationType } from '../schemas/notification.schema';
+import { NotificationType, RelatedType } from '../schemas/notification.schema';
 import { Types } from 'mongoose';
 
 export class CreateNotificationDto {
@@ -17,4 +17,6 @@ export class CreateNotificationDto {
   isSeen?: boolean;
 
   type!: NotificationType;
+
+  // relatedTye?: RelatedType; // in this version (V1) will be optional
 }

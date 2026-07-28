@@ -1,4 +1,3 @@
-import { OnModuleInit, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -17,6 +16,7 @@ import { JwtPayloadType } from 'src/common/types/types.auth';
 import { CreateToolReviewDto } from '../review/dtos/create-tool-review.dto';
 import { ReviewService } from '../review/review.service';
 import { RealtimeService } from '../realtime/realtime.service';
+import { CreateUserReviewDto } from '../review/dtos/create-user-review';
 
 @WebSocketGateway({
   cors: {
@@ -47,6 +47,7 @@ export class AppsocketGateway
       client.disconnect();
       throw new WsException('no token provided');
     }
+    console.log('token', token);
     try {
       const payload: JwtPayloadType =
         this.authenticationJwtService.verifyToken(token);
@@ -77,7 +78,7 @@ export class AppsocketGateway
   @SubscribeMessage('user_review')
   async reviewUser(
     @ConnectedSocket() client: Socket,
-    @MessageBody() dto: CreateToolReviewDto,
+    @MessageBody() dto: CreateUserReviewDto,
   ): Promise<void> {
     console.log('🔥 user_review received');
 

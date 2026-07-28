@@ -3,7 +3,6 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Notification, NotificationType } from './schemas/notification.schema';
 import { Model } from 'mongoose';
-import { JwtPayloadType } from 'src/common/types/types.auth';
 
 @Injectable()
 export class NotificationService {
@@ -15,10 +14,6 @@ export class NotificationService {
   async createNotification(createNotificationDto: CreateNotificationDto) {
     return await this.notificationModel.create(createNotificationDto);
   }
-
-  // async rejectRental() {}
-
-  // async approveRental() {}
 
   async myNotifications(userId: string) {
     return await this.notificationModel
@@ -40,7 +35,7 @@ export class NotificationService {
     return notification;
   }
 
-  async markNotidicationAsRead(userId: string, notificationId: string) {
+  async markNotificationAsRead(userId: string, notificationId: string) {
     return await this.notificationModel.findOneAndUpdate(
       {
         _id: notificationId,
@@ -51,7 +46,7 @@ export class NotificationService {
     );
   }
 
-  async markAllNotidicationAsRead(userId: string) {
+  async markAllNotificationAsRead(userId: string) {
     await this.notificationModel.updateMany(
       {
         receiver: userId,
@@ -63,4 +58,14 @@ export class NotificationService {
       message: 'All notifications marked as read.',
     };
   }
+
+  async unReadNotifications(userId: string) {
+    return await this.notificationModel
+      .find({ receiver: userId })
+      .countDocuments({ isRead: false });
+  }
+
+  // async rejectRental() {}
+
+  // async approveRental() {}
 }

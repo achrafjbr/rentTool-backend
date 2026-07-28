@@ -12,14 +12,14 @@ export class UserReview extends Document {
     ref: User.name,
     required: true,
   })
-  from!: Types.ObjectId;
+  from!: Types.ObjectId; // represented the connected user
 
   @Prop({
     type: Types.ObjectId,
     ref: User.name,
     required: true,
   })
-  to!: Types.ObjectId;
+  to!: Types.ObjectId; // represented the receiver user
 }
 
 export const UserReviewSchema = SchemaFactory.createForClass(UserReview);

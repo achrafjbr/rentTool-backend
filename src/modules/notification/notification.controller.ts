@@ -6,19 +6,27 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import type { JwtPayloadType } from 'src/common/types/types.auth';
 import { CurrentUser } from 'src/common/decorators/decorators.currentUser';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 
 @Controller('notification')
+@UseGuards(AuthGuard)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get('me')
   async me(@CurrentUser() userPayload: JwtPayloadType) {
     return await this.notificationService.myNotifications(userPayload.id);
+  }
+
+  @Get('un-read')
+  async unReadNotifications(@CurrentUser() user: JwtPayloadType) {
+    return await this.notificationService.unReadNotifications(user.id);
   }
 
   @Get(':id')
@@ -29,18 +37,18 @@ export class NotificationController {
   }
 
   @Patch(':id/read')
-  async markNotidicationAsRead(
+  async markNotificationAsRead(
     @CurrentUser() user: JwtPayloadType,
     @Param('id', ParseObjectIdPipe) notificationId: string,
   ) {
-    return await this.notificationService.markNotidicationAsRead(
+    return await this.notificationService.markNotificationAsRead(
       user.id,
       notificationId,
     );
   }
 
-  @Patch(':id/read-all')
-  async markAllNotidicationAsRead(user: JwtPayloadType) {
-    return await this.notificationService.markAllNotidicationAsRead(user.id);
+  @Patch('read-all')
+  async markAllNotificationAsRead(@CurrentUser() user: JwtPayloadType) {
+    return await this.notificationService.markAllNotificationAsRead(user.id);
   }
 }

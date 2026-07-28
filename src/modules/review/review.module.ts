@@ -8,9 +8,10 @@ import { UserReview, UserReviewSchema } from './schemas/user-review.schema';
 import { UserModule } from '../user/user.module';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { ReviewController } from './review.controller';
+import { AuthenticationJwtService } from '../authentication/authentication.jwt.service';
 
 @Module({
-  providers: [ReviewService],
+  providers: [ReviewService, AuthenticationJwtService],
   controllers: [ReviewController],
   imports: [
     RealtimeModule,

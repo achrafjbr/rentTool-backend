@@ -6,10 +6,11 @@ import {
   Notification,
   NotificationSchema,
 } from './schemas/notification.schema';
+import { AuthenticationJwtService } from '../authentication/authentication.jwt.service';
 
 @Module({
   controllers: [NotificationController],
-  providers: [NotificationService],
+  providers: [NotificationService, AuthenticationJwtService],
   exports: [NotificationService],
   imports: [
     MongooseModule.forFeature([
