@@ -23,7 +23,7 @@ export class UserService {
   }
 
   async me(user: JwtPayloadType) {
-    return await this.userModel.findOne({ _id: user.id });
+    return await this.userModel.findOne({ _id: user.id }, { password: false });
   }
 
   async updateProfile(
@@ -53,6 +53,6 @@ export class UserService {
   }
 
   async getUserById(userId: string) {
-    return '';
+    return await this.userModel.findOne({ _id: userId }, { password: false });
   }
 }

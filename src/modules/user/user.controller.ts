@@ -8,6 +8,7 @@ import {
   BadRequestException,
   UploadedFile,
   Put,
+  Param,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -17,22 +18,20 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
-import { extname, join } from 'path';
-import { unlink } from 'fs/promises';
-import { cwd } from 'process';
+import { extname } from 'path';
 
 @Controller('user')
 @UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get('me')
   me(@CurrentUser() user: JwtPayloadType) {
     return this.userService.me(user);
   }
 
-  @Get()
-  getUserById(userId: string) {
+  @Get(':id')
+  getUserById(@Param('id') userId: string) {
     return this.userService.getUserById(userId);
   }
 

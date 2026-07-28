@@ -10,12 +10,12 @@ import { ErrorExceptionFilter } from './core/filters/filters.errorExceptionFilte
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { UserModule } from './modules/user/user.module';
 import { ToolModule } from './modules/tool/tool.module';
-import { ToolReviewModule } from './modules/tool-review/tool-review.module';
 import { AppsocketGateway } from './modules/appsocket/appsocket.gateway';
 import { AppsocketModule } from './modules/appsocket/appsocket.module';
-import { AppsocketService } from './modules/appsocket/appsocket.service';
 import { AuthenticationJwtService } from './modules/authentication/authentication.jwt.service';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ReviewModule } from './modules/review/review.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -44,9 +44,10 @@ import { NotificationModule } from './modules/notification/notification.module';
     AuthenticationModule,
     UserModule,
     ToolModule,
-    ToolReviewModule,
-    AppsocketModule,
     NotificationModule,
+    ReviewModule,
+    RealtimeModule,
+    AppsocketModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,8 +60,6 @@ import { NotificationModule } from './modules/notification/notification.module';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    AppsocketGateway,
-    AppsocketService,
     AuthenticationJwtService,
   ],
 })

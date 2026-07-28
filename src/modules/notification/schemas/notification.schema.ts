@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { HydratedDocument, Types } from 'mongoose';
-import { ToolReview } from 'src/modules/tool-review/schemas/tool-review.schema';
+import { ToolReview } from 'src/modules/review/schemas/tool-review.schema';
 import { User } from 'src/modules/user/schemas/user.schema';
 
 export type NotificationDocument = HydratedDocument<Notification>;
@@ -21,14 +21,14 @@ export class Notification {
     ref: User.name,
     required: true,
   })
-  receiverId!: Types.ObjectId;
+  receiver!: Types.ObjectId;
 
   @Prop({
     type: Types.ObjectId,
     ref: User.name,
     required: true,
   })
-  senderId!: Types.ObjectId;
+  sender!: Types.ObjectId;
 
   @Prop({
     required: true,
@@ -47,21 +47,11 @@ export class Notification {
   })
   type!: NotificationType;
 
-  // Optional if notification is related to a rental
   @Prop({
     type: Types.ObjectId,
-    ref: 'Rental',
-    required: false,
+    required: true,
   })
-  rentalId?: Types.ObjectId;
-
-  // Optional if notification is related to a review
-  @Prop({
-    type: Types.ObjectId,
-    ref: ToolReview.name,
-    required: false,
-  })
-  reviewId?: Types.ObjectId;
+  related!: Types.ObjectId;
 
   @Prop({
     default: false,

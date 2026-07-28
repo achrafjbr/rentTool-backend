@@ -25,6 +25,7 @@ export class AuthenticationJwtService {
       const payload = this.jwtService.verify<JwtPayloadType>(token, {
         secret: this.configService.get<string>('JWT_KEY'),
       });
+
       return payload;
     } catch (error) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
