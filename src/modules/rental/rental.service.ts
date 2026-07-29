@@ -70,7 +70,7 @@ export class RentalService {
 
   // locataire:
   // -- demandes envoyée:
-  async renterRentRequests(renter: string) {
+  async RequestsSentByRenter(renter: string) {
     this.rentalModel
       .find({ renter: renter })
       .populate({ path: 'owner', select: { fullName: 1 } })
@@ -80,7 +80,7 @@ export class RentalService {
 
   // propéitaire :
   // -- demendes reçues:
-  async ownerRentRequestsReceived(owner: string) {
+  async RequestsReceivedByOwner(owner: string) {
     this.rentalModel
       .find({ owner: owner })
       .populate({ path: 'owner', select: { fullName: 1, picture: 1 } })
