@@ -16,6 +16,7 @@ import { AuthenticationJwtService } from './modules/authentication/authenticatio
 import { NotificationModule } from './modules/notification/notification.module';
 import { ReviewModule } from './modules/review/review.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { RentalModule } from './modules/rental/rental.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     ReviewModule,
     RealtimeModule,
     AppsocketModule,
+    RentalModule,
   ],
   controllers: [AppController],
   providers: [
