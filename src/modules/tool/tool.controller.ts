@@ -80,4 +80,12 @@ export class ToolController {
   public async getTools() {
     return await this.toolService.getTools();
   }
+
+  // Home page tool.
+  @Get('owner-tools')
+  public async getAllToolsWithOwners(
+    @CurrentUser() userPayload: JwtPayloadType,
+  ) {
+    return await this.toolService.getAllToolsWithOwners(userPayload);
+  }
 }

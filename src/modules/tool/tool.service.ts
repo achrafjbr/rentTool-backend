@@ -17,6 +17,7 @@ export class ToolService {
   ) {
     return await this.toolModel.create({
       ...createToolDto,
+
       image: `tools${file.filename}`,
       owner: userPayload.id,
     });
@@ -41,5 +42,15 @@ export class ToolService {
     return await this.toolModel
       .find({ owner: userPayload.id }, { __v: false })
       .populate('owner');
+  }
+
+  public async getAllToolsWithOwners(userPayload: JwtPayloadType) {
+    // Getting tool with it's owner and excluding the current user Tools
+    return await this.toolModel
+      .find({ owner: { $ne: userPayload.id } })
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, city: 1 },
+      });
   }
 }
