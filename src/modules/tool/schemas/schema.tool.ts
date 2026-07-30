@@ -28,7 +28,7 @@ export class Tool extends Document {
   image!: string;
 
   @Prop({ type: String, enum: ToolStatus, default: ToolStatus.AVAILABLE })
-  toolStatus?: string;
+  toolStatus?: ToolStatus;
 
   @Prop({
     type: Types.ObjectId,

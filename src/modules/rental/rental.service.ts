@@ -123,6 +123,14 @@ export class RentalService {
       .exec();
   }
 
+  async ReturnRentRequest() {
+    // update RentalStatus to [RETURN_REQUESTED].
+    // send notification to the owner.
+    // send updatedRental in realtime to owner.
+    // --- the owner should confirm the tool return then will update RentalStatus to [COMPLETED] status
+    // & change ToolStatus yo [AVAILABLE].
+  }
+
   // propéitaire :
   // -- demendes reçues:
   async RequestsReceivedByOwner(owner: string) {
@@ -135,9 +143,23 @@ export class RentalService {
       .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
       .exec();
   }
-  async approveRequest() {}
-  async rejectRequest() {}
-  async confirmReturnRequest() {}
+  async approveRequest(rentalId: string) {
+    // update RentalStatus to [APPROVED].
+    // change the ToolStatus to [RENTED]
+    // send notification to the renter.
+    // send updatedRental in realtime to renter.
+  }
+  async rejectRequest() {
+    // update RentalStatus to [REJECTED].
+    // send notification to the renter.
+    // send updatedRental in realtime to renter.
+  }
+  async confirmReturnRequest() {
+    // update RentalStatus to [COMPLETED].
+    // change the ToolStatus to [AVAILABLE]
+    // send notification to the renter.
+    // send updatedRental in realtime to renter.
+  }
 
   async ownerGains(owner: JwtPayloadType) {
     await this.rentalModel.aggregate([
