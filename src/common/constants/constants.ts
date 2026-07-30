@@ -16,4 +16,7 @@ export const NOTIFICATION = 'notification';
 export const TOOL_REVIEW = 'tool_review';
 export const USER_REVIEW = 'user_review';
 
+export const RENTAL_CREATED = 'rental_created';
+export const RENTAL_UPDATED = 'rental_updated';
+
 // Client EVENTS

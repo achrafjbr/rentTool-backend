@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +12,13 @@ import { Rental, RentalStatus } from './schemas/rental.schema';
 import { Model } from 'mongoose';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/schemas/notification.schema';
+import { NOTIFICATION, RENTAL_CREATED } from 'src/common/constants/constants';
+import { IRental } from 'src/common/types/type.rental-response';
+import {
+  numberRentalDays,
+  ownerRentalPayload,
+  renterRentalPayload,
+} from 'src/common/utilities/utilitie.rental';
 
 @Injectable()
 export class RentalService {
@@ -36,24 +42,22 @@ export class RentalService {
     if (tool.toolStatus != 'AVAILABLE') {
       throw new NotFoundException('this tool not available right now.');
     }
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
-    const rentalDays = Math.ceil(
-      (endDate.getTime() - endDate.getTime()) / millisecondsPerDay,
-    );
-    const totalPrice = rentalDays * tool.pricePerDay;
+    const totalPrice = numberRentalDays(startDate, endDate) * tool.pricePerDay;
+    const owner = tool.owner;
+
     // create rentale
     const rental = await this.rentalModel.create({
       ...dto,
       renter: userPayload.id,
-      owner: tool.owner,
+      owner: owner,
       totalPrice: totalPrice,
       rentalStatus: RentalStatus.PENDING,
     });
-    // send notification to owner
+    // create notification
     const notification = await this.notificationService.createNotification({
       sender: userPayload.id,
-      receiver: tool.owner,
+      receiver: owner,
       title: 'Nouvelle demande de location',
       message: `${userPayload.fullName} souhaite louer votre  "${tool.name}". Veuillez confirmer la réception.`,
       related: rental._id,
@@ -62,31 +66,79 @@ export class RentalService {
       isSeen: false,
     });
     //--- send notification after transfrom it.
-
+    this.realtimeService.notifyUser(
+      owner.toString(),
+      NOTIFICATION,
+      notification,
+    );
     // --- send rental after transfrom it for the OWNER & RENTER.
-    // notify renter
+    const Irental: IRental = await this.getRental(rental.id);
+    console.log('rental', Irental);
+    const rentalDays = numberRentalDays(
+      new Date(Irental.startDate),
+      new Date(Irental.endDate),
+    );
+
+    const rentalData = { ...Irental, rentalDays: rentalDays };
     // notify owner
+    this.realtimeService.notifyUser(
+      owner.toString(),
+      RENTAL_CREATED,
+      renterRentalPayload(rentalData),
+    );
+    // notify renter
+    this.realtimeService.notifyUser(
+      userPayload.id,
+      RENTAL_CREATED,
+      ownerRentalPayload(rentalData),
+    );
+  }
+
+  async getRental(rentalId: string): Promise<IRental> {
+    const rental = await this.rentalModel
+      .findById(rentalId)
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, picture: 1, password: 0 },
+      })
+      .populate({
+        path: 'renter',
+        select: { fullName: 1, picture: 1, password: 0 },
+      })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
+      .lean();
+    return rental;
   }
 
   // locataire:
-  // -- demandes envoyée:
+  // -- demandes envoyée:return await
   async RequestsSentByRenter(renter: string) {
-    this.rentalModel
+    return await this.rentalModel
       .find({ renter: renter })
-      .populate({ path: 'owner', select: { fullName: 1 } })
-      .populate({ path: 'tool', select: { name: 1 } })
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, picture: 1, password: 0 },
+      })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
       .exec();
   }
 
   // propéitaire :
   // -- demendes reçues:
   async RequestsReceivedByOwner(owner: string) {
-    this.rentalModel
+    return await this.rentalModel
       .find({ owner: owner })
-      .populate({ path: 'owner', select: { fullName: 1, picture: 1 } })
-      .populate({ path: 'tool', select: { name: 1 } })
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, picture: 1, password: 0 },
+      })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
       .exec();
   }
+  async approveRequest() {}
+  async rejectRequest() {}
+  async confirmReturnRequest() {}
+
   async ownerGains(owner: JwtPayloadType) {
     await this.rentalModel.aggregate([
       {
