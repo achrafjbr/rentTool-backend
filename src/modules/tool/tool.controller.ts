@@ -58,6 +58,14 @@ export class ToolController {
     return await this.toolService.publishTool(userPayload, createToolDto, file);
   }
 
+  // Home page tool.
+  @Get('owner/tools')
+  public async getAllToolsWithOwners(
+    @CurrentUser() userPayload: JwtPayloadType,
+  ) {
+    return await this.toolService.getAllToolsWithOwners(userPayload);
+  }
+
   @Get('my-tools')
   public async getOwnerTools(@CurrentUser() userPayload: JwtPayloadType) {
     return await this.toolService.getOwnerTools(userPayload);
@@ -73,19 +81,12 @@ export class ToolController {
 
   @Get(':toolId')
   public async getTool(@Param('toolId', ParseObjectIdPipe) toolId: string) {
+    console.log('Here');
     return await this.toolService.getTool(toolId);
   }
 
-  @Get()
-  public async getTools() {
-    return await this.toolService.getTools();
-  }
-
-  // Home page tool.
-  @Get('owner-tools')
-  public async getAllToolsWithOwners(
-    @CurrentUser() userPayload: JwtPayloadType,
-  ) {
-    return await this.toolService.getAllToolsWithOwners(userPayload);
-  }
+  // @Get()
+  // public async getTools() {
+  //   return await this.toolService.getTools();
+  // }
 }
