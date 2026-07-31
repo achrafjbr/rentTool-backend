@@ -12,13 +12,18 @@ import { Rental, RentalStatus } from './schemas/rental.schema';
 import { Model } from 'mongoose';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/schemas/notification.schema';
-import { NOTIFICATION, RENTAL_CREATED } from 'src/common/constants/constants';
+import {
+  NOTIFICATION,
+  RENTAL_CREATED,
+  RENTAL_UPDATED,
+} from 'src/common/constants/constants';
 import { IRental } from 'src/common/types/type.rental-response';
 import {
   numberRentalDays,
   ownerRentalPayload,
   renterRentalPayload,
 } from 'src/common/utilities/utilitie.rental';
+import { ToolStatus } from '../tool/schemas/schema.tool';
 
 @Injectable()
 export class RentalService {
@@ -28,6 +33,26 @@ export class RentalService {
     private readonly notificationService: NotificationService,
     private readonly realtimeService: RealtimeService,
   ) {}
+
+  private async getRental(rentalId: string): Promise<IRental> {
+    const rental = await this.rentalModel
+      .findById(rentalId)
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, picture: 1 },
+      })
+      .populate({
+        path: 'renter',
+        select: { fullName: 1, picture: 1 },
+      })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
+      .lean<IRental>();
+    if (!rental) {
+      throw new NotFoundException('Rental not found');
+    }
+    return rental;
+  }
+
   public async renteTool(userPayload: JwtPayloadType, dto: CreateRentalDto) {
     const startDate = new Date(dto.startDate);
     const endDate = new Date(dto.endDate);
@@ -73,7 +98,6 @@ export class RentalService {
     );
     // --- send rental after transfrom it for the OWNER & RENTER.
     const Irental: IRental = await this.getRental(rental.id);
-    console.log('rental', Irental);
     const rentalDays = numberRentalDays(
       new Date(Irental.startDate),
       new Date(Irental.endDate),
@@ -92,85 +116,251 @@ export class RentalService {
       RENTAL_CREATED,
       ownerRentalPayload(rentalData),
     );
+    return rentalData;
   }
 
-  async getRental(rentalId: string): Promise<IRental> {
-    const rental = await this.rentalModel
-      .findById(rentalId)
-      .populate({
-        path: 'owner',
-        select: { fullName: 1, picture: 1, password: 0 },
-      })
-      .populate({
-        path: 'renter',
-        select: { fullName: 1, picture: 1, password: 0 },
-      })
-      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
-      .lean();
-    return rental;
-  }
-
-  // locataire:
-  // -- demandes envoyée:return await
-  async RequestsSentByRenter(renter: string) {
+  // Locataire:
+  // -- demandes envoyée:
+  public async getRequestsSentByRenter(renter: JwtPayloadType) {
     return await this.rentalModel
-      .find({ renter: renter })
+      .find({ renter: renter.id })
       .populate({
         path: 'owner',
-        select: { fullName: 1, picture: 1, password: 0 },
+        select: { fullName: 1, picture: 1 },
       })
-      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
+      .populate({ path: 'tool', select: { name: 1 } })
       .exec();
   }
 
-  async ReturnRentRequest() {
+  // Renter could click on return which means this tool has been returned to his owner.
+  public async returnRentRequest(rentalId: string, renter: JwtPayloadType) {
     // update RentalStatus to [RETURN_REQUESTED].
-    // send notification to the owner.
+    const rental = await this.rentalModel.findById(rentalId);
+    if (!rental) {
+      throw new NotFoundException('not rent found!');
+    }
+    if (rental.rentalStatus != RentalStatus.APPROVED) {
+      throw new NotFoundException('this tool already token');
+    }
+    rental.rentalStatus = RentalStatus.RETURN_REQUESTED;
+    const savedRental = await rental.save();
+
+    const tool = await this.toolService.getTool(rental.tool.toString());
+    if (!tool) {
+      throw new NotFoundException('not tool found to approve!');
+    }
+
+    // Create notification.
+    const notification = await this.notificationService.createNotification({
+      title: "Retour d'outil déclaré 🔄",
+      message: `${renter.fullName} a indiqué avoir restitué votre "${tool.name}". Veuillez confirmer la réception.`,
+      related: rental._id,
+      type: NotificationType.RENT_RETURN,
+      sender: renter.id,
+      receiver: rental.owner,
+    });
+
     // send updatedRental in realtime to owner.
-    // --- the owner should confirm the tool return then will update RentalStatus to [COMPLETED] status
-    // & change ToolStatus yo [AVAILABLE].
+    this.realtimeService.notifyUser(
+      rental.owner.toString(),
+      NOTIFICATION,
+      notification,
+    );
+    const updatedRental = await this.getRental(savedRental.id);
+    const rentalDays = numberRentalDays(
+      new Date(updatedRental.startDate),
+      new Date(updatedRental.endDate),
+    );
+    // send updatedRental in realtime to renter.
+    this.realtimeService.notifyUser(
+      savedRental.owner.toString(),
+      RENTAL_UPDATED,
+      renterRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
+    );
+    return updatedRental;
   }
 
-  // propéitaire :
+  // Propéitaire :
   // -- demendes reçues:
-  async RequestsReceivedByOwner(owner: string) {
+  public async getRequestsReceivedByOwner(owner: JwtPayloadType) {
     return await this.rentalModel
-      .find({ owner: owner })
+      .find({
+        $and: [
+          { owner: owner.id },
+          {
+            $or: [
+              { rentalStatus: RentalStatus.PENDING },
+              { rentalStatus: RentalStatus.RETURN_REQUESTED },
+            ],
+          },
+        ],
+      })
       .populate({
         path: 'owner',
-        select: { fullName: 1, picture: 1, password: 0 },
+        select: { fullName: 1, picture: 1 },
       })
       .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
       .exec();
   }
-  async approveRequest(rentalId: string) {
+
+  public async approveRentRequest(rentalId: string, owner: JwtPayloadType) {
     // update RentalStatus to [APPROVED].
+    const rental = await this.rentalModel.findById(rentalId);
+    if (!rental) {
+      throw new NotFoundException('not rent found!');
+    }
+    if (rental.rentalStatus != RentalStatus.PENDING) {
+      throw new NotFoundException('this tool already token');
+    }
+    rental.rentalStatus = RentalStatus.APPROVED;
+    const savedRental = await rental.save();
+
+    const tool = await this.toolService.getTool(rental.tool.toString());
+    if (!tool) {
+      throw new NotFoundException('not tool found to approve!');
+    }
     // change the ToolStatus to [RENTED]
-    // send notification to the renter.
+    tool.toolStatus = ToolStatus.RENTED;
+    await tool.save();
+    // Create notification.
+    const notification = await this.notificationService.createNotification({
+      title: 'Demande acceptée ! 🎉',
+      message: `${owner.fullName} a approuvé votre demande de location pour "${tool.name}". Prenez contact pour la remise de loutil.`,
+      related: rental._id,
+      type: NotificationType.RENT_APPROVED,
+      receiver: rental.renter,
+      sender: owner.id,
+    });
+    // Send notification to renter.
+    this.realtimeService.notifyUser(
+      rental.renter.toString(),
+      NOTIFICATION,
+      notification,
+    );
+    const updatedRental = await this.getRental(savedRental.id);
+    const rentalDays = numberRentalDays(
+      new Date(updatedRental.startDate),
+      new Date(updatedRental.endDate),
+    );
     // send updatedRental in realtime to renter.
+    this.realtimeService.notifyUser(
+      savedRental.renter.toString(),
+      RENTAL_UPDATED,
+      renterRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
+    );
+    return updatedRental;
   }
-  async rejectRequest() {
+
+  public async rejectRentRequest(rentalId: string, owner: JwtPayloadType) {
     // update RentalStatus to [REJECTED].
-    // send notification to the renter.
+    const rental = await this.rentalModel.findById(rentalId);
+    if (!rental) {
+      throw new NotFoundException('not rent found!');
+    }
+    if (rental.rentalStatus != RentalStatus.PENDING) {
+      throw new NotFoundException('this tool already token');
+    }
+    rental.rentalStatus = RentalStatus.REJECTED;
+    const savedRental = await rental.save();
+
+    const tool = await this.toolService.getTool(rental.tool.toString());
+    if (!tool) {
+      throw new BadRequestException('something went wrong please try again.');
+      return;
+    }
+    // Create notification.
+    const notification = await this.notificationService.createNotification({
+      title: 'Demande refusée',
+      message: `${owner.fullName} ne peut pas donner suite à votre demande pour "${tool.name}".`,
+      related: rental._id,
+      type: NotificationType.RENT_APPROVED,
+      receiver: rental.renter,
+      sender: owner.id,
+    });
+    // Send notification to renter.
+    this.realtimeService.notifyUser(
+      rental.renter.toString(),
+      NOTIFICATION,
+      notification,
+    );
+    const updatedRental = await this.getRental(savedRental.id);
+    const rentalDays = numberRentalDays(
+      new Date(updatedRental.startDate),
+      new Date(updatedRental.endDate),
+    );
     // send updatedRental in realtime to renter.
+    this.realtimeService.notifyUser(
+      savedRental.renter.toString(),
+      RENTAL_UPDATED,
+      renterRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
+    );
+    return updatedRental;
   }
-  async confirmReturnRequest() {
+
+  public async confirmReturnRentRequest(
+    rentalId: string,
+    owner: JwtPayloadType,
+  ) {
     // update RentalStatus to [COMPLETED].
+    const rental = await this.rentalModel.findById(rentalId);
+    if (!rental) {
+      throw new NotFoundException('not rent found!');
+    }
+    if (rental.rentalStatus != RentalStatus.RETURN_REQUESTED) {
+      throw new NotFoundException('this tool already token');
+    }
+    rental.rentalStatus = RentalStatus.COMPLETED;
+    const savedRental = await rental.save();
+
+    const tool = await this.toolService.getTool(rental.tool.toString());
+    if (!tool) {
+      throw new NotFoundException('not tool found to approve!');
+    }
     // change the ToolStatus to [AVAILABLE]
-    // send notification to the renter.
+    tool.toolStatus = ToolStatus.AVAILABLE;
+    await tool.save();
+    // Create notification.
+    const notification = await this.notificationService.createNotification({
+      title: 'Location terminée ! 🤝',
+      message: `${owner.fullName} a confirmé le retour de l'outil "${tool.name}". Merci d'avoir utilisé ToolRent !`,
+      related: rental._id,
+      type: NotificationType.RENT_RETURN_CONFIRMED,
+      receiver: rental.renter,
+      sender: owner.id,
+    });
+    // Send notification to renter.
+    this.realtimeService.notifyUser(
+      rental.renter.toString(),
+      NOTIFICATION,
+      notification,
+    );
+    const updatedRental = await this.getRental(savedRental.id);
+    const rentalDays = numberRentalDays(
+      new Date(updatedRental.startDate),
+      new Date(updatedRental.endDate),
+    );
     // send updatedRental in realtime to renter.
+    this.realtimeService.notifyUser(
+      savedRental.renter.toString(),
+      RENTAL_UPDATED,
+      renterRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
+    );
+    return updatedRental;
   }
 
   async ownerGains(owner: JwtPayloadType) {
-    await this.rentalModel.aggregate([
+    const gains = await this.rentalModel.aggregate([
       {
         $match: { owner: owner.id, rentalStatus: RentalStatus.COMPLETED },
       },
       {
-        $project: {
-          totalPrice: { $sum: '$totalPrice' },
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$totalPrice' },
         },
       },
     ]);
+    const totalRevenue = gains[0]?.totalRevenue ?? 0;
+    return { totalRevenue };
   }
 }

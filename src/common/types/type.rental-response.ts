@@ -1,10 +1,12 @@
 import { RentalStatus } from 'src/modules/rental/schemas/rental.schema';
 
 export type UserType = {
+  _id: string;
   fullName: string;
   picture?: string;
 };
 export type ToolType = {
+  _id: string;
   name: string;
   pricePerDay: number;
 };

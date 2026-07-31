@@ -7,8 +7,8 @@ export enum RentalStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
-  COMPLETED = 'COMPLETED',
   RETURN_REQUESTED = 'RETURN_REQUESTED',
+  COMPLETED = 'COMPLETED',
 }
 
 @Schema({ timestamps: true })
@@ -46,6 +46,11 @@ export class Rental extends Document {
     default: RentalStatus.PENDING,
   })
   rentalStatus!: RentalStatus;
+  @Prop({ required: true })
+  startDate!: Date;
+
+  @Prop({ required: true })
+  endDate!: Date;
 }
 
 export const RentalSchema = SchemaFactory.createForClass(Rental);
