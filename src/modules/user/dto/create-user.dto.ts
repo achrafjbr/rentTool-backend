@@ -1,8 +1,8 @@
 import {
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
+  IsStrongPassword,
   MaxLength,
 } from 'class-validator';
 
@@ -17,6 +17,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsString()
+  @IsStrongPassword()
   password!: string;
 
   @IsNotEmpty()
