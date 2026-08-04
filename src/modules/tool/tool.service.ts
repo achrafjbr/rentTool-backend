@@ -31,11 +31,19 @@ export class ToolService {
   }
 
   public async getTool(toolId: string) {
-    return await this.toolModel.findOne({ _id: toolId }, { __v: false });
+    return await this.toolModel
+      .findOne({ _id: toolId }, { __v: false })
+      .populate({
+        path: 'owner',
+        select: { fullName: 1, city: 1 },
+      });
   }
 
   public async getTools() {
-    return await this.toolModel.find({}, { __v: false });
+    return await this.toolModel.find({}, { __v: false }).populate({
+      path: 'owner',
+      select: { fullName: 1, city: 1 },
+    });
   }
 
   public async getOwnerTools(userPayload: JwtPayloadType) {
@@ -46,6 +54,7 @@ export class ToolService {
 
   public async getAllToolsWithOwners(userPayload: JwtPayloadType) {
     // Getting tool with it's owner and excluding the current user Tools
+    console.log('id', userPayload.id);
     return await this.toolModel
       .find({ owner: { $ne: userPayload.id } })
       .populate({

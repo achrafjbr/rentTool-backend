@@ -22,7 +22,6 @@ import { ToolService } from './tool.service';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('tool')
-@UseGuards(AuthGuard)
 export class ToolController {
   constructor(private readonly toolService: ToolService) {}
   @Post('publish_tool')
@@ -60,6 +59,7 @@ export class ToolController {
 
   // Home page tool.
   @Get('owner/tools')
+  @UseGuards(AuthGuard)
   public async getAllToolsWithOwners(
     @CurrentUser() userPayload: JwtPayloadType,
   ) {
@@ -67,11 +67,13 @@ export class ToolController {
   }
 
   @Get('my-tools')
+  @UseGuards(AuthGuard)
   public async getOwnerTools(@CurrentUser() userPayload: JwtPayloadType) {
     return await this.toolService.getOwnerTools(userPayload);
   }
 
   @Delete(':toolId')
+  @UseGuards(AuthGuard)
   public async removeTool(
     @Param('toolId', ParseObjectIdPipe) toolId: string,
     @CurrentUser() userPayload: JwtPayloadType,
@@ -80,13 +82,14 @@ export class ToolController {
   }
 
   @Get(':toolId')
+  @UseGuards(AuthGuard)
   public async getTool(@Param('toolId', ParseObjectIdPipe) toolId: string) {
     console.log('Here');
     return await this.toolService.getTool(toolId);
   }
 
-  // @Get()
-  // public async getTools() {
-  //   return await this.toolService.getTools();
-  // }
+  @Get()
+  public async getTools() {
+    return await this.toolService.getTools();
+  }
 }
