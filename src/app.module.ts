@@ -17,6 +17,8 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ReviewModule } from './modules/review/review.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { RentalModule } from './modules/rental/rental.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -41,6 +43,10 @@ import { RentalModule } from './modules/rental/rental.module';
           secret: configService.get<string>('JWT_KEY'),
         };
       },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
     }),
     AuthenticationModule,
     UserModule,

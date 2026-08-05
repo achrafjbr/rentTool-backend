@@ -3,7 +3,7 @@ import { JwtPayloadType } from 'src/common/types/types.auth';
 import { CreateToolDto } from './dtos/create-tool.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tool } from './schemas/schema.tool';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ToolService {
@@ -18,7 +18,7 @@ export class ToolService {
     return await this.toolModel.create({
       ...createToolDto,
 
-      image: `tools${file.filename}`,
+      image: file.filename,
       owner: userPayload.id,
     });
   }
