@@ -68,7 +68,7 @@ export class RentalService {
       throw new NotFoundException('this tool not available right now.');
     }
 
-    const totalPrice = numberRentalDays(startDate, endDate) * tool.pricePerDay;
+    const totalPrice = numberRentalDays(startDate, endDate)! * tool.pricePerDay;
     const owner = tool.owner;
 
     // create rentale

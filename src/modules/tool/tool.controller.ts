@@ -72,6 +72,11 @@ export class ToolController {
     return await this.toolService.getOwnerTools(userPayload);
   }
 
+  @Get('cities')
+  public async getToolCities() {
+    return await this.toolService.getToolCities();
+  }
+
   @Delete(':toolId')
   @UseGuards(AuthGuard)
   public async removeTool(

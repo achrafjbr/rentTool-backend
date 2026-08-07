@@ -4,11 +4,13 @@ import { CreateToolDto } from './dtos/create-tool.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tool } from './schemas/schema.tool';
 import { Model } from 'mongoose';
+import { User } from '../user/schemas/user.schema';
 
 @Injectable()
 export class ToolService {
   constructor(
     @InjectModel(Tool.name) private readonly toolModel: Model<Tool>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
   public async publishTool(
     userPayload: JwtPayloadType,
@@ -44,6 +46,16 @@ export class ToolService {
       path: 'owner',
       select: { fullName: 1, city: 1 },
     });
+  }
+
+  public async getToolCities() {
+    console.log('skskks');
+    const cities = await this.toolModel
+      .distinct('owner')
+      .then((ownerIds) =>
+        this.userModel.distinct('city', { _id: { $in: ownerIds } }),
+      );
+    return cities;
   }
 
   public async getOwnerTools(userPayload: JwtPayloadType) {

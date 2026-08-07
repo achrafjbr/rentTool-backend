@@ -5,12 +5,16 @@ import { AuthenticationJwtService } from '../authentication/authentication.jwt.s
 import { MongooseModule } from '@nestjs/mongoose';
 import { Tool, ToolSchema } from './schemas/schema.tool';
 import { UserModule } from '../user/user.module';
+import { User, UserSchema } from '../user/schemas/user.schema';
 
 @Module({
   providers: [ToolService, AuthenticationJwtService],
   controllers: [ToolController],
   imports: [
-    MongooseModule.forFeature([{ name: Tool.name, schema: ToolSchema }]),
+    MongooseModule.forFeature([
+      { name: Tool.name, schema: ToolSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
     UserModule,
   ],
   exports: [ToolService],

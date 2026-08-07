@@ -32,6 +32,7 @@ export function numberRentalDays(startDate: Date, endDate: Date) {
   const rentDays = Math.ceil(
     (endDate.getTime() - startDate.getTime()) / millisecondsPerDay,
   );
+  if (isNaN(rentDays)) return;
 
   return rentDays;
 }
