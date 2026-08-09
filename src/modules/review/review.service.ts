@@ -155,7 +155,7 @@ export class ReviewService {
       .find({ to: userId })
       .populate({
         path: 'from',
-        select: { fullName: 1, picture: 1 },
+        select: { fullName: 1, picture: 1, createdAt: 1 },
       })
       .sort({ createdAt: -1 })
       .exec();
