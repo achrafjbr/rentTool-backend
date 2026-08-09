@@ -37,7 +37,7 @@ export class ToolService {
       .findOne({ _id: toolId }, { __v: false })
       .populate({
         path: 'owner',
-        select: { fullName: 1, city: 1 },
+        select: { fullName: 1, city: 1, picture: 1, createdAt: 1 },
       });
   }
 
@@ -49,7 +49,6 @@ export class ToolService {
   }
 
   public async getToolCities() {
-    console.log('skskks');
     const cities = await this.toolModel
       .distinct('owner')
       .then((ownerIds) =>

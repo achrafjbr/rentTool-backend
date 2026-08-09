@@ -19,7 +19,6 @@ import { UpdateToolReviewDto } from './dtos/update-tool-review.dto';
 import { UpdateUserReviewDto } from './dtos/update-user-review.dto';
 
 @Controller('review')
-@UseGuards(AuthGuard)
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
@@ -34,6 +33,7 @@ export class ReviewController {
   // DELETE /reviews/user/:id
 
   @Post('tool')
+  @UseGuards(AuthGuard)
   async createToolReview(
     @Body() dto: CreateToolReviewDto,
     @CurrentUser() userPayload: JwtPayloadType,
@@ -42,6 +42,7 @@ export class ReviewController {
   }
 
   @Post('user')
+  @UseGuards(AuthGuard)
   async createUserReview(
     @Body() dto: CreateUserReviewDto,
     @CurrentUser() userPayload: JwtPayloadType,
@@ -62,6 +63,7 @@ export class ReviewController {
   }
 
   @Patch('tool/:id')
+  @UseGuards(AuthGuard)
   async updateToolReview(
     @Param('id') id: string,
     @Body() dto: UpdateToolReviewDto,
@@ -70,6 +72,7 @@ export class ReviewController {
   }
 
   @Patch('user/:id')
+  @UseGuards(AuthGuard)
   async updateUserReview(
     @Param('id') id: string,
     @Body() dto: UpdateUserReviewDto,
@@ -78,11 +81,13 @@ export class ReviewController {
   }
 
   @Delete('tool/:id')
+  @UseGuards(AuthGuard)
   async deleteToolReview(@Param('id') id: string) {
     return await this.reviewService.deleteToolReview(id);
   }
 
   @Delete('user/:id')
+  @UseGuards(AuthGuard)
   async deleteUserReview(@Param('id') id: string) {
     return await this.reviewService.deleteUserReview(id);
   }

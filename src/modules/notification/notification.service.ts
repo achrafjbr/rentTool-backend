@@ -30,7 +30,7 @@ export class NotificationService {
       .findById(notificationId)
       .populate({
         path: 'sender',
-        select: { fullName: 1, picture: 1 },
+        select: { fullName: 1, picture: 1, createdAt: 1 },
       });
     return notification;
   }

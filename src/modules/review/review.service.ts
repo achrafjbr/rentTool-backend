@@ -81,7 +81,12 @@ export class ReviewService {
       notification,
     );
 
-    return notification;
+    // return notification;
+
+    return await review.populate({
+      path: 'author',
+      select: { fullName: 1, picture: 1, createdAt: 1 },
+    });
 
     // this line was just for test, I'll delete it later
     // this.realtimeService.notifyUser(tool.owner.toString(), TOOL_REVIEW, review);
@@ -91,8 +96,6 @@ export class ReviewService {
     dto: CreateUserReviewDto,
     userPayload: JwtPayloadType,
   ) {
-    console.log('dto', dto);
-    console.log('userPayload', userPayload);
     const targetUser = await this.userService.getUserById(String(dto.to));
     console.log('user', targetUser);
     if (!targetUser) {
@@ -127,19 +130,21 @@ export class ReviewService {
     // notify owner
     this.realtimeService.notifyUser(targetUser.id, NOTIFICATION, notification);
 
-    return notification;
+    return await review.populate({
+      path: 'from',
+      select: { fullName: 1, picture: 1, createdAt: 1 },
+    });
 
     // this line was just for test, I'll delete it later
     // this.realtimeService.notifyUser(targetUser.id, USER_REVIEW, review);
   }
 
   async getToolReviews(toolId: string) {
-    console.log('toolId', toolId);
     return await this.toolReviewModel
       .find({ tool: toolId })
       .populate({
         path: 'author',
-        select: { fullName: 1, picture: 1 },
+        select: { fullName: 1, picture: 1, createdAt: 1 },
       })
       .sort({ createdAt: -1 })
       .exec();

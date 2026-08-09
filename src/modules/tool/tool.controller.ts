@@ -87,7 +87,7 @@ export class ToolController {
   }
 
   @Get(':toolId')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   public async getTool(@Param('toolId', ParseObjectIdPipe) toolId: string) {
     console.log('Here');
     return await this.toolService.getTool(toolId);
