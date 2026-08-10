@@ -66,10 +66,13 @@ export class ToolController {
     return await this.toolService.getAllToolsWithOwners(userPayload);
   }
 
-  @Get('my-tools')
-  @UseGuards(AuthGuard)
-  public async getOwnerTools(@CurrentUser() userPayload: JwtPayloadType) {
-    return await this.toolService.getOwnerTools(userPayload);
+  @Get('my-tools:id')
+  // @UseGuards(AuthGuard)
+  public async getOwnerTools(
+    // @CurrentUser() userPayload: JwtPayloadType
+    @Param('id') userId: string,
+  ) {
+    return await this.toolService.getOwnerTools(userId);
   }
 
   @Get('cities')

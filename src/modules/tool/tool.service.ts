@@ -57,9 +57,9 @@ export class ToolService {
     return cities;
   }
 
-  public async getOwnerTools(userPayload: JwtPayloadType) {
+  public async getOwnerTools(userId: string) {
     return await this.toolModel
-      .find({ owner: userPayload.id }, { __v: false })
+      .find({ owner: userId }, { __v: false })
       .populate('owner');
   }
 
