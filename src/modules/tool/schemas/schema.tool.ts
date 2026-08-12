@@ -18,6 +18,9 @@ export class Tool extends Document {
   @Prop({ type: String, required: true })
   category!: string;
 
+  @Prop({ type: String })
+  city?: string; // will be optional for now, i'll change it later on.
+
   @Prop({ type: Number, required: true, min: 1 })
   pricePerDay!: number;
 

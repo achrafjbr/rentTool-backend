@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Tool } from './schemas/schema.tool';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
+import { cp } from 'fs';
 
 @Injectable()
 export class ToolService {
@@ -17,11 +18,14 @@ export class ToolService {
     createToolDto: CreateToolDto,
     file: Express.Multer.File,
   ) {
-    return await this.toolModel.create({
+    const tool = await this.toolModel.create({
       ...createToolDto,
-
       image: file.filename,
       owner: userPayload.id,
+    });
+    return await tool.populate({
+      path: 'owner',
+      select: { fullName: 1, city: 1, picture: 1, createdAt: 1 },
     });
   }
 

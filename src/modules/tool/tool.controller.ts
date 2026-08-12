@@ -25,6 +25,7 @@ import { ParseObjectIdPipe } from '@nestjs/mongoose';
 export class ToolController {
   constructor(private readonly toolService: ToolService) {}
   @Post('publish_tool')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('picture', {
       storage: diskStorage({
@@ -66,7 +67,7 @@ export class ToolController {
     return await this.toolService.getAllToolsWithOwners(userPayload);
   }
 
-  @Get('my-tools:id')
+  @Get('my-tools/:id')
   // @UseGuards(AuthGuard)
   public async getOwnerTools(
     // @CurrentUser() userPayload: JwtPayloadType
@@ -92,7 +93,6 @@ export class ToolController {
   @Get(':toolId')
   // @UseGuards(AuthGuard)
   public async getTool(@Param('toolId', ParseObjectIdPipe) toolId: string) {
-    console.log('Here');
     return await this.toolService.getTool(toolId);
   }
 

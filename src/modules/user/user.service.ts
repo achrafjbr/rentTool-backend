@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -31,16 +31,27 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     file?: Express.Multer.File,
   ) {
+    // console.log('file', file);
+
     if (file) {
       const user = await this.me(userPayload);
       if (user?.picture) {
         try {
-          await unlink(join(process.cwd(), 'uploads', user.picture));
-          file;
-        } catch {}
+          const previousPicture = join(
+            process.cwd(),
+            'uploads',
+            'users',
+            user.picture,
+          );
+          await unlink(previousPicture);
+        } catch (err) {
+          console.log('errrr', err);
+          throw new BadRequestException('Something went wrong...');
+        }
       }
 
-      updateUserDto.picture = `users/${file.filename}`;
+      updateUserDto.picture = file.filename;
+      console.log('picture dto', updateUserDto.picture);
     }
     return await this.userModel.findByIdAndUpdate(
       userPayload.id,

@@ -18,6 +18,10 @@ export class CreateToolDto {
 
   @IsString()
   @IsNotEmpty()
+  city!: string;
+
+  @IsString()
+  @IsNotEmpty()
   @MinLength(10)
   @MaxLength(800)
   description!: string;
