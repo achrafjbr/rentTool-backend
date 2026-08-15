@@ -17,6 +17,7 @@ import { CreateRentalDto } from './dtos/create-rental.dto';
 @UseGuards(AuthGuard)
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
+
   // Locataire:
   @Post()
   public async renteTool(

@@ -36,7 +36,7 @@ export class NotificationService {
   }
 
   async markNotificationAsRead(userId: string, notificationId: string) {
-    return await this.notificationModel.findOneAndUpdate(
+    const response = await this.notificationModel.findOneAndUpdate(
       {
         _id: notificationId,
         receiver: userId,
@@ -44,19 +44,19 @@ export class NotificationService {
       { isRead: true },
       { new: true },
     );
+    return response;
   }
 
   async markAllNotificationAsRead(userId: string) {
-    await this.notificationModel.updateMany(
+    const response = await this.notificationModel.updateMany(
       {
         receiver: userId,
         isRead: false,
       },
       { isRead: true },
     );
-    return {
-      message: 'All notifications marked as read.',
-    };
+    if (response) return 1;
+    else return 0;
   }
 
   async unReadNotifications(userId: string) {

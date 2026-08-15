@@ -21,11 +21,11 @@ import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
 import { extname } from 'path';
 
 @Controller('user')
-@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('me')
+  @UseGuards(AuthGuard)
   me(@CurrentUser() user: JwtPayloadType) {
     return this.userService.me(user);
   }
@@ -36,6 +36,7 @@ export class UserController {
   }
 
   @Patch('profile')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('picture', {
       storage: diskStorage({

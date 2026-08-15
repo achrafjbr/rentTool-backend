@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Param, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import type { JwtPayloadType } from 'src/common/types/types.auth';
 import { CurrentUser } from 'src/common/decorators/decorators.currentUser';
@@ -38,8 +29,8 @@ export class NotificationController {
 
   @Patch(':id/read')
   async markNotificationAsRead(
-    @CurrentUser() user: JwtPayloadType,
     @Param('id', ParseObjectIdPipe) notificationId: string,
+    @CurrentUser() user: JwtPayloadType,
   ) {
     return await this.notificationService.markNotificationAsRead(
       user.id,

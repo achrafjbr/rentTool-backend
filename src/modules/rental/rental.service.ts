@@ -45,7 +45,7 @@ export class RentalService {
         path: 'renter',
         select: { fullName: 1, picture: 1 },
       })
-      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1, image: 1 } })
       .lean<IRental>();
     if (!rental) {
       throw new NotFoundException('Rental not found');
@@ -53,6 +53,7 @@ export class RentalService {
     return rental;
   }
 
+  // Locataire:
   public async renteTool(userPayload: JwtPayloadType, dto: CreateRentalDto) {
     const startDate = new Date(dto.startDate);
     const endDate = new Date(dto.endDate);
@@ -64,7 +65,7 @@ export class RentalService {
       throw new NotFoundException('no tool found.');
     }
 
-    if (tool.toolStatus != 'AVAILABLE') {
+    if (tool.toolStatus != ToolStatus.AVAILABLE) {
       throw new NotFoundException('this tool not available right now.');
     }
 
@@ -90,6 +91,7 @@ export class RentalService {
       isRead: false,
       isSeen: false,
     });
+
     //--- send notification after transfrom it.
     this.realtimeService.notifyUser(
       owner.toString(),
@@ -111,15 +113,14 @@ export class RentalService {
       renterRentalPayload(rentalData),
     );
     // notify renter
-    this.realtimeService.notifyUser(
-      userPayload.id,
-      RENTAL_CREATED,
-      ownerRentalPayload(rentalData),
-    );
+    // this.realtimeService.notifyUser(
+    //   userPayload.id,
+    //   RENTAL_CREATED,
+    //   ownerRentalPayload(rentalData),
+    // );
     return rentalData;
   }
 
-  // Locataire:
   // -- demandes envoyée:
   public async getRequestsSentByRenter(renter: JwtPayloadType) {
     return await this.rentalModel
@@ -128,7 +129,7 @@ export class RentalService {
         path: 'owner',
         select: { fullName: 1, picture: 1 },
       })
-      .populate({ path: 'tool', select: { name: 1 } })
+      .populate({ path: 'tool', select: { name: 1, image: 1, pricePerDay: 1 } })
       .exec();
   }
 
@@ -171,7 +172,7 @@ export class RentalService {
       new Date(updatedRental.startDate),
       new Date(updatedRental.endDate),
     );
-    // send updatedRental in realtime to renter.
+    // send updatedRental in realtime to owner.
     this.realtimeService.notifyUser(
       savedRental.owner.toString(),
       RENTAL_UPDATED,
@@ -196,10 +197,10 @@ export class RentalService {
         ],
       })
       .populate({
-        path: 'owner',
+        path: 'renter',
         select: { fullName: 1, picture: 1 },
       })
-      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1 } })
+      .populate({ path: 'tool', select: { name: 1, pricePerDay: 1, image: 1 } })
       .exec();
   }
 

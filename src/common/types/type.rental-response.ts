@@ -9,6 +9,7 @@ export type ToolType = {
   _id: string;
   name: string;
   pricePerDay: number;
+  image: string;
 };
 
 export interface IRental {
