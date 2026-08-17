@@ -57,39 +57,33 @@ export class ReviewService {
     });
 
     // Create notification,
-    const createdNotification =
+    const createNotification =
       await this.notificationService.createNotification({
         sender: userPayload.id,
-        receiver: tool.owner,
+        receiver: tool.owner.id.toString(),
         message: `${userPayload.fullName} a laissé un avis sur "${tool.name}".`,
         title: 'Nouvel avis',
         type: NotificationType.TOOL_REVIEW,
         // relatedTye: RelatedType.TOOL_REVIEW,
-        related: review._id,
+        related: review.id,
         isRead: false,
         isSeen: false,
       });
 
-    const notification = this.notificationService.getNotificationById(
-      createdNotification.id,
-    );
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
 
     // notify owner
     this.realtimeService.notifyUser(
-      tool.owner.toString(),
+      tool.owner._id.toString(),
       NOTIFICATION,
       notification,
     );
-
-    // return notification;
 
     return await review.populate({
       path: 'author',
       select: { fullName: 1, picture: 1, createdAt: 1 },
     });
-
-    // this line was just for test, I'll delete it later
-    // this.realtimeService.notifyUser(tool.owner.toString(), TOOL_REVIEW, review);
   }
 
   async createUserReview(
@@ -110,22 +104,21 @@ export class ReviewService {
     });
 
     // Create notification,
-    const createdNotification =
+    const createNotification =
       await this.notificationService.createNotification({
         sender: userPayload.id,
-        receiver: targetUser._id,
+        receiver: targetUser.id,
         message: `${userPayload.fullName} a laissé un avis sur ton profil.`,
         title: 'Nouvel avis',
         type: NotificationType.USER_REVIEW,
         // relatedTye: RelatedType.USER_REVIEW,
-        related: review._id,
+        related: review.id,
         isRead: false,
         isSeen: false,
       });
 
-    const notification = this.notificationService.getNotificationById(
-      createdNotification.id,
-    );
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
 
     // notify owner
     this.realtimeService.notifyUser(targetUser.id, NOTIFICATION, notification);
@@ -134,9 +127,6 @@ export class ReviewService {
       path: 'from',
       select: { fullName: 1, picture: 1, createdAt: 1 },
     });
-
-    // this line was just for test, I'll delete it later
-    // this.realtimeService.notifyUser(targetUser.id, USER_REVIEW, review);
   }
 
   async getToolReviews(toolId: string) {

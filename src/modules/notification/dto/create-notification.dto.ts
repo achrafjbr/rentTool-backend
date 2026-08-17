@@ -2,11 +2,11 @@ import { NotificationType, RelatedType } from '../schemas/notification.schema';
 import { Types } from 'mongoose';
 
 export class CreateNotificationDto {
-  receiver!: Types.ObjectId;
+  receiver!: string;
 
   sender!: string;
 
-  related!: Types.ObjectId;
+  related!: string;
 
   title!: string;
 

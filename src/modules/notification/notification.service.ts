@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectModel, ParseObjectIdPipe } from '@nestjs/mongoose';
 import { Notification, NotificationType } from './schemas/notification.schema';
-import { Model } from 'mongoose';
+import { DefaultSchemaOptions, Document, Model, Types } from 'mongoose';
 
 @Injectable()
 export class NotificationService {
@@ -15,14 +15,24 @@ export class NotificationService {
     return await this.notificationModel.create(createNotificationDto);
   }
 
+  async populateNotification(
+    notification: Document<unknown, {}, Notification, {}, DefaultSchemaOptions>,
+  ) {
+    return await notification.populate({
+      path: 'sender',
+      select: { fullName: 1, picture: 1, createdAt: 1 },
+    });
+  }
+
   async myNotifications(userId: string) {
-    return await this.notificationModel
+    const notifications = await this.notificationModel
       .find({ receiver: userId })
       .populate({
         path: 'sender',
-        select: { fullName: 1, picture: 1 },
+        select: { fullName: 1, picture: 1, createdAt: 1 },
       })
       .sort({ createdAt: -1 });
+    return notifications;
   }
 
   async getNotificationById(notificationId: string) {

@@ -34,6 +34,8 @@ export class RentalService {
     private readonly realtimeService: RealtimeService,
   ) {}
 
+  private notification = async (notification: Notification) => {};
+
   private async getRental(rentalId: string): Promise<IRental> {
     const rental = await this.rentalModel
       .findById(rentalId)
@@ -81,16 +83,20 @@ export class RentalService {
       rentalStatus: RentalStatus.PENDING,
     });
     // create notification
-    const notification = await this.notificationService.createNotification({
-      sender: userPayload.id,
-      receiver: owner,
-      title: 'Nouvelle demande de location',
-      message: `${userPayload.fullName} souhaite louer votre  "${tool.name}". Veuillez confirmer la réception.`,
-      related: rental._id,
-      type: NotificationType.RENT_REQUEST,
-      isRead: false,
-      isSeen: false,
-    });
+    const createNotification =
+      await this.notificationService.createNotification({
+        sender: userPayload.id,
+        receiver: owner._id.toString(),
+        title: 'Nouvelle demande de location',
+        message: `${userPayload.fullName} souhaite louer votre  "${tool.name}". Veuillez confirmer la réception.`,
+        related: rental.id,
+        type: NotificationType.RENT_REQUEST,
+        isRead: false,
+        isSeen: false,
+      });
+
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
 
     //--- send notification after transfrom it.
     this.realtimeService.notifyUser(
@@ -152,21 +158,26 @@ export class RentalService {
     }
 
     // Create notification.
-    const notification = await this.notificationService.createNotification({
-      title: "Retour d'outil déclaré 🔄",
-      message: `${renter.fullName} a indiqué avoir restitué votre "${tool.name}". Veuillez confirmer la réception.`,
-      related: rental._id,
-      type: NotificationType.RENT_RETURN,
-      sender: renter.id,
-      receiver: rental.owner,
-    });
+    const createNotification =
+      await this.notificationService.createNotification({
+        title: "Retour d'outil déclaré 🔄",
+        message: `${renter.fullName} a indiqué avoir restitué votre "${tool.name}". Veuillez confirmer la réception.`,
+        related: rental.id,
+        type: NotificationType.RENT_RETURN,
+        sender: renter.id,
+        receiver: rental.owner.id.toString(),
+      });
+
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
 
     // send updatedRental in realtime to owner.
     this.realtimeService.notifyUser(
-      rental.owner.toString(),
+      rental.owner._id.toString(),
       NOTIFICATION,
       notification,
     );
+
     const updatedRental = await this.getRental(savedRental.id);
     const rentalDays = numberRentalDays(
       new Date(updatedRental.startDate),
@@ -224,14 +235,19 @@ export class RentalService {
     tool.toolStatus = ToolStatus.RENTED;
     await tool.save();
     // Create notification.
-    const notification = await this.notificationService.createNotification({
-      title: 'Demande acceptée ! 🎉',
-      message: `${owner.fullName} a approuvé votre demande de location pour "${tool.name}". Prenez contact pour la remise de loutil.`,
-      related: rental._id,
-      type: NotificationType.RENT_APPROVED,
-      receiver: rental.renter,
-      sender: owner.id,
-    });
+    const createNotification =
+      await this.notificationService.createNotification({
+        title: 'Demande acceptée ! 🎉',
+        message: `${owner.fullName} a approuvé votre demande de location pour "${tool.name}". Prenez contact pour la remise de loutil.`,
+        related: rental.id,
+        type: NotificationType.RENT_APPROVED,
+        receiver: rental.renter._id.toString(),
+        sender: owner.id,
+      });
+
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
+
     // Send notification to renter.
     this.realtimeService.notifyUser(
       rental.renter.toString(),
@@ -270,14 +286,19 @@ export class RentalService {
       return;
     }
     // Create notification.
-    const notification = await this.notificationService.createNotification({
-      title: 'Demande refusée',
-      message: `${owner.fullName} ne peut pas donner suite à votre demande pour "${tool.name}".`,
-      related: rental._id,
-      type: NotificationType.RENT_APPROVED,
-      receiver: rental.renter,
-      sender: owner.id,
-    });
+    const createNotification =
+      await this.notificationService.createNotification({
+        title: 'Demande refusée',
+        message: `${owner.fullName} ne peut pas donner suite à votre demande pour "${tool.name}".`,
+        related: rental.id,
+        type: NotificationType.RENT_APPROVED,
+        receiver: rental.renter.id.toString(),
+        sender: owner.id,
+      });
+
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
+
     // Send notification to renter.
     this.realtimeService.notifyUser(
       rental.renter.toString(),
@@ -321,14 +342,19 @@ export class RentalService {
     tool.toolStatus = ToolStatus.AVAILABLE;
     await tool.save();
     // Create notification.
-    const notification = await this.notificationService.createNotification({
-      title: 'Location terminée ! 🤝',
-      message: `${owner.fullName} a confirmé le retour de l'outil "${tool.name}". Merci d'avoir utilisé ToolRent !`,
-      related: rental._id,
-      type: NotificationType.RENT_RETURN_CONFIRMED,
-      receiver: rental.renter,
-      sender: owner.id,
-    });
+    const createNotification =
+      await this.notificationService.createNotification({
+        title: 'Location terminée ! 🤝',
+        message: `${owner.fullName} a confirmé le retour de l'outil "${tool.name}". Merci d'avoir utilisé ToolRent !`,
+        related: rental.id,
+        type: NotificationType.RENT_RETURN_CONFIRMED,
+        receiver: rental.renter._id.toString(),
+        sender: owner.id,
+      });
+
+    const notification =
+      await this.notificationService.populateNotification(createNotification);
+
     // Send notification to renter.
     this.realtimeService.notifyUser(
       rental.renter.toString(),
