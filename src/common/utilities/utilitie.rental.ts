@@ -4,6 +4,7 @@ export function renterRentalPayload(rental: IRental) {
   return {
     _id: rental._id,
     owner: rental.owner,
+    renter: rental.renter,
     tool: rental.tool,
     startDate: rental.startDate,
     endDate: rental.endDate,
@@ -17,6 +18,7 @@ export function ownerRentalPayload(rental: IRental) {
   return {
     _id: rental._id,
     renter: rental.renter,
+    owner: rental.owner,
     tool: rental.tool,
     startDate: rental.startDate,
     endDate: rental.endDate,

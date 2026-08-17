@@ -34,8 +34,6 @@ export class RentalService {
     private readonly realtimeService: RealtimeService,
   ) {}
 
-  private notification = async (notification: Notification) => {};
-
   private async getRental(rentalId: string): Promise<IRental> {
     const rental = await this.rentalModel
       .findById(rentalId)
@@ -216,21 +214,26 @@ export class RentalService {
   }
 
   public async approveRentRequest(rentalId: string, owner: JwtPayloadType) {
+    console.log('rental id', rentalId);
     // update RentalStatus to [APPROVED].
-    const rental = await this.rentalModel.findById(rentalId);
+    const rental = await this.rentalModel.findOne({ _id: rentalId });
     if (!rental) {
       throw new NotFoundException('not rent found!');
     }
+    console.log('rental', rental);
     if (rental.rentalStatus != RentalStatus.PENDING) {
       throw new NotFoundException('this tool already token');
     }
-    rental.rentalStatus = RentalStatus.APPROVED;
-    const savedRental = await rental.save();
 
     const tool = await this.toolService.getTool(rental.tool.toString());
     if (!tool) {
       throw new NotFoundException('not tool found to approve!');
     }
+    console.log('tool', tool);
+
+    rental.rentalStatus = RentalStatus.APPROVED;
+    const savedRental = await rental.save();
+
     // change the ToolStatus to [RENTED]
     tool.toolStatus = ToolStatus.RENTED;
     await tool.save();
@@ -241,7 +244,7 @@ export class RentalService {
         message: `${owner.fullName} a approuvé votre demande de location pour "${tool.name}". Prenez contact pour la remise de loutil.`,
         related: rental.id,
         type: NotificationType.RENT_APPROVED,
-        receiver: rental.renter._id.toString(),
+        receiver: rental.renter.toString(),
         sender: owner.id,
       });
 
@@ -255,6 +258,8 @@ export class RentalService {
       notification,
     );
     const updatedRental = await this.getRental(savedRental.id);
+    console.log('updatedRental', updatedRental);
+
     const rentalDays = numberRentalDays(
       new Date(updatedRental.startDate),
       new Date(updatedRental.endDate),
@@ -292,7 +297,7 @@ export class RentalService {
         message: `${owner.fullName} ne peut pas donner suite à votre demande pour "${tool.name}".`,
         related: rental.id,
         type: NotificationType.RENT_APPROVED,
-        receiver: rental.renter.id.toString(),
+        receiver: rental.renter.toString(),
         sender: owner.id,
       });
 
@@ -348,7 +353,7 @@ export class RentalService {
         message: `${owner.fullName} a confirmé le retour de l'outil "${tool.name}". Merci d'avoir utilisé ToolRent !`,
         related: rental.id,
         type: NotificationType.RENT_RETURN_CONFIRMED,
-        receiver: rental.renter._id.toString(),
+        receiver: rental.renter.toString(),
         sender: owner.id,
       });
 
