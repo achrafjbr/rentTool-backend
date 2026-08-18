@@ -80,11 +80,12 @@ export class RentalService {
       totalPrice: totalPrice,
       rentalStatus: RentalStatus.PENDING,
     });
+
     // create notification
     const createNotification =
       await this.notificationService.createNotification({
         sender: userPayload.id,
-        receiver: owner._id.toString(),
+        receiver: owner.id.toString(),
         title: 'Nouvelle demande de location',
         message: `${userPayload.fullName} souhaite louer votre  "${tool.name}". Veuillez confirmer la réception.`,
         related: rental.id,
@@ -98,7 +99,7 @@ export class RentalService {
 
     //--- send notification after transfrom it.
     this.realtimeService.notifyUser(
-      owner.toString(),
+      owner.id.toString(),
       NOTIFICATION,
       notification,
     );
@@ -112,7 +113,7 @@ export class RentalService {
     const rentalData = { ...Irental, rentalDays: rentalDays };
     // notify owner
     this.realtimeService.notifyUser(
-      owner.toString(),
+      owner.id.toString(),
       RENTAL_CREATED,
       renterRentalPayload(rentalData),
     );
@@ -163,7 +164,7 @@ export class RentalService {
         related: rental.id,
         type: NotificationType.RENT_RETURN,
         sender: renter.id,
-        receiver: rental.owner.id.toString(),
+        receiver: rental.owner.toString(),
       });
 
     const notification =
@@ -171,7 +172,7 @@ export class RentalService {
 
     // send updatedRental in realtime to owner.
     this.realtimeService.notifyUser(
-      rental.owner._id.toString(),
+      rental.owner.toString(),
       NOTIFICATION,
       notification,
     );
@@ -201,6 +202,7 @@ export class RentalService {
             $or: [
               { rentalStatus: RentalStatus.PENDING },
               { rentalStatus: RentalStatus.RETURN_REQUESTED },
+              { rentalStatus: RentalStatus.APPROVED },
             ],
           },
         ],
@@ -214,22 +216,18 @@ export class RentalService {
   }
 
   public async approveRentRequest(rentalId: string, owner: JwtPayloadType) {
-    console.log('rental id', rentalId);
     // update RentalStatus to [APPROVED].
     const rental = await this.rentalModel.findOne({ _id: rentalId });
     if (!rental) {
       throw new NotFoundException('not rent found!');
     }
-    console.log('rental', rental);
     if (rental.rentalStatus != RentalStatus.PENDING) {
       throw new NotFoundException('this tool already token');
     }
-
     const tool = await this.toolService.getTool(rental.tool.toString());
     if (!tool) {
       throw new NotFoundException('not tool found to approve!');
     }
-    console.log('tool', tool);
 
     rental.rentalStatus = RentalStatus.APPROVED;
     const savedRental = await rental.save();
@@ -258,7 +256,6 @@ export class RentalService {
       notification,
     );
     const updatedRental = await this.getRental(savedRental.id);
-    console.log('updatedRental', updatedRental);
 
     const rentalDays = numberRentalDays(
       new Date(updatedRental.startDate),
@@ -282,14 +279,15 @@ export class RentalService {
     if (rental.rentalStatus != RentalStatus.PENDING) {
       throw new NotFoundException('this tool already token');
     }
-    rental.rentalStatus = RentalStatus.REJECTED;
-    const savedRental = await rental.save();
 
     const tool = await this.toolService.getTool(rental.tool.toString());
     if (!tool) {
       throw new BadRequestException('something went wrong please try again.');
-      return;
     }
+
+    rental.rentalStatus = RentalStatus.REJECTED;
+    const savedRental = await rental.save();
+
     // Create notification.
     const createNotification =
       await this.notificationService.createNotification({

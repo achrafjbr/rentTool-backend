@@ -52,13 +52,11 @@ export class ReviewController {
 
   @Get('tool/:toolId')
   async getToolReviews(@Param('toolId') toolId: string) {
-    console.log('toolId', toolId);
     return this.reviewService.getToolReviews(toolId);
   }
 
   @Get('user/:userId')
   async getUserReviews(@Param('userId') userId: string) {
-    console.log('userId', userId);
     return this.reviewService.getUserReviews(userId);
   }
 
