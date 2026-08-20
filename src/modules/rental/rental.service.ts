@@ -265,7 +265,7 @@ export class RentalService {
     this.realtimeService.notifyUser(
       savedRental.renter.toString(),
       RENTAL_UPDATED,
-      renterRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
+      ownerRentalPayload({ ...updatedRental, rentalDays: rentalDays }),
     );
     return updatedRental;
   }
