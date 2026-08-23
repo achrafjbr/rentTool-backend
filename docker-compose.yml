@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: .
+    container_name: rent-tool-backend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+
+  mongo:
+    image: mongo:8
+    container_name: rent-tool-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
