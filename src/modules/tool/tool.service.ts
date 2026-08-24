@@ -1,32 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { JwtPayloadType } from 'src/common/types/types.auth';
 import { CreateToolDto } from './dtos/create-tool.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tool } from './schemas/schema.tool';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
-import { cp } from 'fs';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { UploadApiErrorResponse } from 'cloudinary';
 
 @Injectable()
 export class ToolService {
   constructor(
     @InjectModel(Tool.name) private readonly toolModel: Model<Tool>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
   public async publishTool(
     userPayload: JwtPayloadType,
     createToolDto: CreateToolDto,
     file: Express.Multer.File,
   ) {
-    const tool = await this.toolModel.create({
-      ...createToolDto,
-      image: file.filename,
-      owner: userPayload.id,
-    });
-    return await tool.populate({
-      path: 'owner',
-      select: { fullName: 1, city: 1, picture: 1, createdAt: 1 },
-    });
+    try {
+      const { secure_url } = await this.cloudinaryService.uploadImage(
+        file,
+        'tools',
+      );
+
+      const tool = await this.toolModel.create({
+        ...createToolDto,
+        image: secure_url,
+        owner: userPayload.id,
+      });
+      return await tool.populate({
+        path: 'owner',
+        select: { fullName: 1, city: 1, picture: 1, createdAt: 1 },
+      });
+    } catch (error) {
+      const err = error as UploadApiErrorResponse;
+      throw new HttpException(err.message, err.http_code);
+    }
   }
 
   public async removeTool(toolId: string, userPayload: JwtPayloadType) {

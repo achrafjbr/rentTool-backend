@@ -23,6 +23,9 @@ export class User extends Document {
   picture?: string;
 
   @Prop({ type: String })
+  picturePublicId?: string;
+
+  @Prop({ type: String })
   bio?: string;
 
   @Prop({ type: String })

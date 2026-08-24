@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
@@ -7,11 +6,13 @@ import { Model } from 'mongoose';
 import { JwtPayloadType } from 'src/common/types/types.auth';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   public async getUserByEmail(email: string): Promise<User | null> {
@@ -31,27 +32,15 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     file?: Express.Multer.File,
   ) {
-    // console.log('file', file);
-
     if (file) {
       const user = await this.me(userPayload);
       if (user?.picture) {
-        try {
-          const previousPicture = join(
-            process.cwd(),
-            'uploads',
-            'users',
-            user.picture,
-          );
-          await unlink(previousPicture);
-        } catch (err) {
-          console.log('errrr', err);
-          throw new BadRequestException('Something went wrong...');
-        }
+        await this.cloudinaryService.deleteImage(user.picturePublicId!);
       }
-
-      updateUserDto.picture = file.filename;
-      console.log('picture dto', updateUserDto.picture);
+      const { secure_url, public_id } =
+        await this.cloudinaryService.uploadImage(file, 'users');
+      updateUserDto.picture = secure_url;
+      updateUserDto.picturePublicId = public_id;
     }
     return await this.userModel.findByIdAndUpdate(
       userPayload.id,

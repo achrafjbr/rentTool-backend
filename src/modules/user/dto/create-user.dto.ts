@@ -33,6 +33,10 @@ export class CreateUserDto {
   picture!: string;
 
   @IsOptional()
+  @IsString()
+  picturePublicId!: string;
+
+  @IsOptional()
   @MaxLength(800)
   @IsString()
   bio!: string;

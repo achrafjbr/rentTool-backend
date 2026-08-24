@@ -19,6 +19,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
 import { RentalModule } from './modules/rental/rental.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     RealtimeModule,
     AppsocketModule,
     RentalModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [

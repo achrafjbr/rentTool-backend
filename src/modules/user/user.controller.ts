@@ -15,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CurrentUser } from 'src/common/decorators/decorators.currentUser';
 import type { JwtPayloadType } from 'src/common/types/types.auth';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { AuthGuard } from 'src/common/decorators/decorator.authGuard';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
 import { extname } from 'path';
@@ -39,18 +39,11 @@ export class UserController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('picture', {
-      storage: diskStorage({
-        destination: './uploads/users',
-        filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
-          cb(null, filename);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         if (!ALLOWED_IMAGE_MIMETYPES.includes(file.mimetype)) {
-          cb(new BadRequestException('Only image allowed'), false);
+          return cb(new BadRequestException('Only image allowed'), false);
         }
-
         cb(null, true);
       },
       limits: {

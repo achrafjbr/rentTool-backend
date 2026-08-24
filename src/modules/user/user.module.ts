@@ -4,17 +4,14 @@ import { UserController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { AuthenticationJwtService } from '../authentication/authentication.jwt.service';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   controllers: [UserController],
   providers: [UserService, AuthenticationJwtService],
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    // MulterModule.registerAsync({
-    //   useFactory: () => {
-    //     return {};
-    //   },
-    // }),
+    CloudinaryModule,
   ],
   exports: [UserService],
 })

@@ -16,7 +16,7 @@ import type { JwtPayloadType } from 'src/common/types/types.auth';
 import { CreateToolDto } from './dtos/create-tool.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ALLOWED_IMAGE_MIMETYPES } from 'src/common/constants/constants';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 import { ToolService } from './tool.service';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
@@ -28,18 +28,11 @@ export class ToolController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('picture', {
-      storage: diskStorage({
-        destination: './uploads/tools',
-        filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
-          cb(null, filename);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         if (!ALLOWED_IMAGE_MIMETYPES.includes(file.mimetype)) {
-          cb(new BadRequestException('Only image allowed'), false);
+          return cb(new BadRequestException('Only image allowed'), false);
         }
-
         cb(null, true);
       },
       limits: {

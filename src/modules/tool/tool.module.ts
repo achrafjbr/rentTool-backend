@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Tool, ToolSchema } from './schemas/schema.tool';
 import { UserModule } from '../user/user.module';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   providers: [ToolService, AuthenticationJwtService],
@@ -16,6 +17,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
       { name: User.name, schema: UserSchema },
     ]),
     UserModule,
+    CloudinaryModule,
   ],
   exports: [ToolService],
 })
