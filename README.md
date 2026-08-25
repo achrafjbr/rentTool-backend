@@ -322,7 +322,7 @@ This project demonstrates experience with:
 
 ## 👨‍💻 Author
 
-**Achraf Jbr**
+**Achraf EL JABBAR**
 
 Backend Developer focused on **NestJS, Node.js, TypeScript, MongoDB, and REST API development**.
 
