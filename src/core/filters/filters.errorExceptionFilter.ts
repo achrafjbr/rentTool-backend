@@ -20,7 +20,6 @@ export class ErrorExceptionFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const exceptionResponse = exception.getResponse();
-    console.log('response', exceptionResponse);
     const message =
       typeof exceptionResponse == 'string'
         ? exception.getResponse()

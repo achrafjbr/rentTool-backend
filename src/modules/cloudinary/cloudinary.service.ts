@@ -42,6 +42,7 @@ export class CloudinaryService {
         resource_type: 'image',
       });
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         'Something went wrong, try again...',
         HttpStatus.INTERNAL_SERVER_ERROR,
