@@ -34,94 +34,297 @@
 
 <b>Sequence Diagram:</b>
 <small>Shown just how rental process goes</small>
-  <img width="1121" height="597" alt="diagram_suqence" src="https://github.com/user-attachments/assets/2d2f9597-6800-444e-8345-2b302f839762" />
+<img width="1121" height="597" alt="diagram_suqence" src="https://github.com/user-attachments/assets/2d2f9597-6800-444e-8345-2b302f839762" />
 
 <b>Use Case:</b>
 <img width="1121" height="597" alt="useCase" src="https://github.com/user-attachments/assets/71b7d2db-728a-4df1-9e23-a99e748d7366" />
 
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# RentTool Backend
 
-## Project setup
+Backend API for a tool rental platform built with **NestJS, TypeScript, and MongoDB**.
 
-```bash
-$ npm install
+The application provides the backend infrastructure for managing users, tools, rentals, reviews, notifications, authentication, real-time communication, and media uploads.
+
+## 🚀 Features
+
+- 🔐 JWT-based authentication
+- 👤 User management
+- 🛠️ Tool management
+- 🤝 Rental management
+- ⭐ Tool and user reviews
+- 🔔 Persistent notifications
+- ⚡ Real-time communication with WebSockets
+- ☁️ Cloudinary integration for media management
+- 🧩 DTO-based request validation
+- 🛡️ Custom authentication decorators and guards
+- 🚨 Global exception handling
+- 📦 Standardized API responses
+- 🧪 Unit tests for controllers and services
+- 🐳 Docker support
+
+## 🛠️ Tech Stack
+
+- **NestJS**
+- **TypeScript**
+- **MongoDB**
+- **Mongoose**
+- **JWT**
+- **WebSockets**
+- **Cloudinary**
+- **Docker**
+- **Jest**
+
+## 🏗️ Architecture
+
+The application is organized around independent NestJS modules, with shared infrastructure separated into common and core layers.
+
+```text
+src/
+├── common/
+│   ├── constants/
+│   ├── decorators/
+│   ├── types/
+│   └── utilities/
+│
+├── core/
+│   ├── filters/
+│   └── interceptors/
+│
+└── modules/
+    ├── authentication/
+    ├── user/
+    ├── tool/
+    ├── rental/
+    ├── review/
+    ├── notification/
+    ├── appsocket/
+    ├── realtime/
+    └── cloudinary/
 ```
 
-## Compile and run the project
+### Common Layer
 
-````bash
-# development
+Contains shared application utilities such as:
 
+- Custom decorators
+- Authentication-related decorators
+- Shared types
+- Constants
+- Rental utilities
 
-```bash
-$ npm install
-````
+### Core Layer
 
-## Compile and run the project
+Contains cross-cutting application infrastructure:
 
-```bash
-# development
-$ npm run start
+- Global exception handling
+- Response interception
 
-# watch mode
-$ npm run start:dev
+### Modules
 
-# production mode
-$ npm run start:prod
+Each business domain is isolated into its own NestJS module with controllers, services, DTOs, and schemas where applicable.
+
+## 🔐 Authentication
+
+The authentication module provides:
+
+- User login
+- JWT-based authentication
+- Password encryption
+- Authentication services
+- DTO-based request handling
+- Custom authentication decorators
+
+Protected application resources can use the project's authentication infrastructure to identify and authorize authenticated users.
+
+## 🛠️ Tool Management
+
+The tool module handles the management of rental tools.
+
+It includes:
+
+- Tool creation
+- Tool updates
+- Tool retrieval
+- Tool-related business logic
+- MongoDB/Mongoose schema
+- DTO-based request validation
+
+## 🤝 Rental Management
+
+The rental module contains the business logic related to tool rentals.
+
+It provides:
+
+- Rental creation
+- Rental updates
+- Rental retrieval
+- Rental-specific business utilities
+- Persistent rental data using MongoDB/Mongoose
+
+## ⭐ Reviews
+
+The review module supports two review domains:
+
+- **Tool reviews**
+- **User reviews**
+
+Each review type has dedicated schemas and DTOs for creating and updating reviews.
+
+## 🔔 Notifications
+
+The notification module provides persistent notification management.
+
+It includes:
+
+- Notification creation
+- Notification updates
+- Notification retrieval
+- MongoDB persistence
+
+Notifications can be combined with the real-time layer to provide users with real-time updates.
+
+## ⚡ Real-Time Communication
+
+The application includes WebSocket-based real-time communication.
+
+The real-time infrastructure is separated into dedicated modules:
+
+```text
+appsocket/
+realtime/
+notification/
 ```
 
-## Run tests
+This allows the backend to handle real-time application events while keeping notification persistence separate from real-time delivery.
 
-```bash
-# unit tests
-$ npm run test
+## ☁️ Cloudinary Integration
 
-# e2e tests
-$ npm run test:e2e
+The project includes a dedicated Cloudinary module for media management.
 
-# test coverage
-$ npm run test:cov
+```text
+cloudinary/
+├── cloudinary.module.ts
+├── cloudinary.provider.ts
+└── cloudinary.service.ts
 ```
 
-## Deployment
+The integration is isolated from the rest of the application through a dedicated provider and service.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 🧪 Testing
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The project includes unit tests for controllers and services across several application modules using **Jest**.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Example:
+
+```text
+authentication/
+├── authentication.controller.spec.ts
+└── authentication.service.spec.ts
+
+rental/
+├── rental.controller.spec.ts
+└── rental.service.spec.ts
+
+review/
+├── review.controller.spec.ts
+└── review.service.spec.ts
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🐳 Docker
 
-## Resources
+The project supports running the backend using Docker.
 
-Check out a few resources that may come in handy when working with NestJS:
+Make sure Docker and Docker Compose are installed before starting the application with the containerized setup.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## ⚙️ Installation
 
-## Support
+Clone the repository:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+git clone https://github.com/achrafjbr/rentTool-backend.git
 
-## Stay in touch
+cd rentTool-backend
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Install dependencies:
 
-## License
+```bash
+npm install
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Create your environment configuration file:
+
+```text
+MONGODB_URI=
+DB_NAME=
+APP_NAME=
+JWT_SECRET=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+.env
+```
+
+Configure the required environment variables for the application, including database, authentication, and Cloudinary configuration.
+
+Start the development server:
+
+```bash
+npm run start:dev
+```
+
+## 🧪 Running Tests
+
+Run unit tests with:
+
+```bash
+npm run test
+```
+
+## 📁 Main Project Structure
+
+```text
+src/
+├── common/
+├── core/
+├── modules/
+│   ├── appsocket/
+│   ├── authentication/
+│   ├── cloudinary/
+│   ├── notification/
+│   ├── realtime/
+│   ├── rental/
+│   ├── review/
+│   ├── tool/
+│   └── user/
+├── app.module.ts
+└── main.ts
+```
+
+## 📌 Project Highlights
+
+This project demonstrates experience with:
+
+- Modular NestJS architecture
+- REST API development
+- Authentication and authorization
+- MongoDB/Mongoose data modeling
+- Real-time WebSocket communication
+- External service integration
+- DTO-based validation
+- Global exception handling
+- API response standardization
+- Unit testing
+- Dockerized backend development
+
+## 👨‍💻 Author
+
+**Achraf Jbr**
+
+Backend Developer focused on **NestJS, Node.js, TypeScript, MongoDB, and REST API development**.
+
+GitHub:
+https://github.com/achrafjbr

@@ -71,7 +71,6 @@ export class AppsocketGateway
     @MessageBody() dto: CreateToolReviewDto,
   ): Promise<void> {
     console.log('🔥 tool_review received');
-
     await this.toolReviewService.createToolReview(dto, client.data.user);
   }
 
