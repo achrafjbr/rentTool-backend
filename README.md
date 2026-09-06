@@ -38,7 +38,8 @@
 <img width="1121" height="597" alt="diagram_suqence" src="https://github.com/user-attachments/assets/2d2f9597-6800-444e-8345-2b302f839762" />
 
 <b>Use Case:</b>
-<img width="1121" height="597" alt="useCase" src="https://github.com/user-attachments/assets/71b7d2db-728a-4df1-9e23-a99e748d7366" />
+<img width="702" height="562" alt="Rent_tool_use_case drawio" src="https://github.com/user-attachments/assets/ccc4a672-7eeb-455d-a765-a3f2eb741553" />
+
 
 ## Description
 
