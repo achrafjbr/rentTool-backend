@@ -30,7 +30,8 @@
 # I used UML for analyse project requirements.
 
 <b>Class Diagram :</b>
-<img width="1121" height="597" alt="class_diagram" src="https://github.com/user-attachments/assets/d9ccb695-0c66-4b2d-a44a-7fe12ad942e8" />
+<img width="1062" height="906" alt="Rent_tool_class_diagram drawio" src="https://github.com/user-attachments/assets/653d0118-4224-478b-bb04-5da3ee349b73" />
+
 
 <b>Sequence Diagram:</b>
 <small>Shown just how rental process goes</small>
