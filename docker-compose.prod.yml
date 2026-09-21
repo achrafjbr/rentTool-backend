@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: rent-tool-backend
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - .env
+
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1

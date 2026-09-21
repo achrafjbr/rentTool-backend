@@ -53,7 +53,7 @@ export class ToolService {
       .findOne({ _id: toolId }, { __v: false })
       .populate({
         path: 'owner',
-        select: { fullName: 1, city: 1, picture: 1, createdAt: 1 },
+        select: { fullName: 1, city: 1, picture: 1, createdAt: 1, phone: 1 },
       });
   }
 
@@ -81,7 +81,6 @@ export class ToolService {
 
   public async getAllToolsWithOwners(userPayload: JwtPayloadType) {
     // Getting tool with it's owner and excluding the current user Tools
-    console.log('id', userPayload.id);
     return await this.toolModel
       .find({ owner: { $ne: userPayload.id } })
       .populate({
