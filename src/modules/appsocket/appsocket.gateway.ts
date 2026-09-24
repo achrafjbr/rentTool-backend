@@ -21,7 +21,7 @@ import { CreateUserReviewDto } from '../review/dtos/create-user-review';
 @WebSocketGateway({
   cors: {
     credentials: false,
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:4173'],
   },
 })
 // @UseGuards(AuthGuard)
