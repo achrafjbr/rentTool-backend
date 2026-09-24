@@ -21,7 +21,11 @@ import { CreateUserReviewDto } from '../review/dtos/create-user-review';
 @WebSocketGateway({
   cors: {
     credentials: false,
-    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'https://renttool-frontend-production.up.railway.app',
+    ],
   },
 })
 // @UseGuards(AuthGuard)
@@ -37,7 +41,6 @@ export class AppsocketGateway
   @WebSocketServer()
   server: Server;
   afterInit() {
-    console.log('afterInit func');
     this.realtimeService.setServer(this.server);
   }
 
@@ -47,30 +50,23 @@ export class AppsocketGateway
       client.disconnect();
       throw new WsException('no token provided');
     }
-    console.log('token', token);
     try {
       const payload: JwtPayloadType =
         this.authenticationJwtService.verifyToken(token);
       client.data.user = payload;
       client.join(`user:${payload.id}`);
-      console.log(
-        `🟢 User id: ${payload.id} | socketId: ${client.id} connected`,
-      );
     } catch (error: any) {
       console.log('Error:', error.message);
       client.disconnect();
     }
   }
-  handleDisconnect(client: Socket) {
-    console.log(`🔴 ${client.data.user.id} disconnected`);
-  }
+  handleDisconnect(client: Socket) {}
 
   @SubscribeMessage('tool_review')
   async reviewTool(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateToolReviewDto,
   ): Promise<void> {
-    console.log('🔥 tool_review received');
     await this.toolReviewService.createToolReview(dto, client.data.user);
   }
 
@@ -79,8 +75,6 @@ export class AppsocketGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateUserReviewDto,
   ): Promise<void> {
-    console.log('🔥 user_review received');
-
     await this.toolReviewService.createUserReview(dto, client.data.user);
   }
 
