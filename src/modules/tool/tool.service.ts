@@ -82,7 +82,7 @@ export class ToolService {
   public async getAllToolsWithOwners(userPayload: JwtPayloadType) {
     // Getting tool with it's owner and excluding the current user Tools
     return await this.toolModel
-      .find({ owner: { $ne: userPayload.id } })
+      .find({ owner: { $ne: userPayload.id }, pricePerDay: { $gt: 25 } })
       .populate({
         path: 'owner',
         select: { fullName: 1, city: 1 },

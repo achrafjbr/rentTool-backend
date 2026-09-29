@@ -1,8 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { User } from '../user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayloadType } from 'src/common/types/types.auth';
+import { Observable } from 'rxjs';
+import { Request } from 'express';
+import { CURRENT_USER } from 'src/common/constants/constants';
 
 @Injectable()
 export class AuthenticationJwtService {
